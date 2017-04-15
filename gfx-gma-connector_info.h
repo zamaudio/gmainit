@@ -16,8 +16,10 @@
 #ifndef GFX_GMA_CONNECTOR_INFO_H
 #define GFX_GMA_CONNECTOR_INFO_H
 
-Boolean Preferred_Link_Setting(Port_Config *Port_Cfg);
-Boolean Next_Link_Setting(Port_Config *Port_Cfg);
-Byte Default_BPC(Port_Config Port_Cfg);
+#include "gfx-gma.h"
+
+bool Preferred_Link_Setting(Port_Config *Port_Cfg);
+bool Next_Link_Setting(Port_Config *Port_Cfg);
+uint8_t Default_BPC(Port_Config Port_Cfg);
 
 #endif

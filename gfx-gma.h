@@ -16,6 +16,10 @@
 #ifndef GFX_GMA_H
 #define GFX_GMA_H
 
+#include <stdbool.h>
+#include <inttypes.h>
+#include "gfx.h"
+
 typedef enum {
 	Ironlake,
 	Sandybridge,
@@ -60,13 +64,13 @@ typedef Pipe_Config Pipe_Configs[3];
 // Only valid on primary pipe.
 #define VGA_PLANE_FRAMEBUFFER_OFFSET 0xffffffff
 
-Boolean Initialize(Word64 MMIO_Base, Word64 Write_Delay, Boolean Clean_State);
+bool Initialize(uint64_t MMIO_Base, uint64_t Write_Delay, bool Clean_State);
 void Update_Outputs(Pipe_Configs Configs);
 void Dump_Configs(Pipe_Configs Configs);
 typedef int GTT_Address_Type;
 typedef int GTT_Range;
-void Write_GTT(GTT_Range GTT_Page, GTT_Address_Type Device_Address, Boolean Valid);
-void Setup_Default_GTT(Framebuffer_Type FB, Word32 Phys_FB);
+void Write_GTT(GTT_Range GTT_Page, GTT_Address_Type Device_Address, bool Valid);
+void Setup_Default_GTT(Framebuffer_Type FB, uint32_t Phys_FB);
 
 // --------------------------------------------------------------------------
 //  State tracking for the currently configured pipes
@@ -102,10 +106,10 @@ typedef PCH_Port PCH_DP_Port;
 
 typedef struct t_Port_Config {
 	GPU_Port Port;
-	GMA.PCH_Port PCH_Port;
+	PCH_Port PCH_Port;
 	Display_Type Display;
 	Mode_Type Mode;
-	Boolean Is_FDI;
+	bool Is_FDI;
 	DP_Link FDI;
 	DP_Link DP;
 } Port_Config;

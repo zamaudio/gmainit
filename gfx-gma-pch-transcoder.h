@@ -16,7 +16,10 @@
 #ifndef GFX_GMA_PCH_TRANSCODER_H
 #define GFX_GMA_PCH_TRANSCODER_H
 
-void On(Port_Config Port_Cfg, FDI_Port_Type Port, Word32 PLL);
+#include <inttypes.h>
+#include "gfx-gma-pch.h"
+
+void On(Port_Config Port_Cfg, FDI_Port_Type Port, uint32_t PLL);
 void Off(FDI_Port_Type Port);
 
 #endif

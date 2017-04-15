@@ -17,7 +17,7 @@
 #include "gfx-gma-registers.h"
 #include "gfx-gma-pch-transcoder.h"
 
-typedef Word32 DPLL_SEL_Array[3];
+typedef uint32_t DPLL_SEL_Array[3];
 
 const DPLL_SEL_Array DPLL_SEL_TRANSCODER_x_DPLL_ENABLE = {
 	1 << 3,
@@ -31,7 +31,7 @@ const DPLL_SEL_Array DPLL_SEL_TRANSCODER_x_DPLL_SEL_MASK = {
 	1 << 8
 };
 
-Word32 DPLL_SEL_TRANSCODER_x_DPLL_SEL(FDI_Port_Type Port, Word32 PLL)
+uint32_t DPLL_SEL_TRANSCODER_x_DPLL_SEL(FDI_Port_Type Port, uint32_t PLL)
 {
 	switch(Port) {
 	case FDI_A:
@@ -53,7 +53,7 @@ Word32 DPLL_SEL_TRANSCODER_x_DPLL_SEL(FDI_Port_Type Port, Word32 PLL)
 #define TRANS_DP_CTL_VSYNC_ACTIVE_HIGH		(1 << 4)
 #define TRANS_DP_CTL_HSYNC_ACTIVE_HIGH		(1 << 3)
 
-typedef Word32 TRANS_DP_CTL_PORT_SELECT_Array[8];
+typedef uint32_t TRANS_DP_CTL_PORT_SELECT_Array[8];
 const TRANS_DP_CTL_PORT_SELECT_Array TRANS_DP_CTL_PORT_SELECT = {
 	0,
 	0,
@@ -65,7 +65,7 @@ const TRANS_DP_CTL_PORT_SELECT_Array TRANS_DP_CTL_PORT_SELECT = {
 	/* PCH_DP_D */ 2 << 29
 };
 
-Word32 TRANS_DP_CTL_BPC(BPC_Type BPC)
+uint32_t TRANS_DP_CTL_BPC(BPC_Type BPC)
 {
 	switch(BPC) {
 	case 6:
@@ -79,87 +79,87 @@ Word32 TRANS_DP_CTL_BPC(BPC_Type BPC)
 	}
 }
 
-Word32 TRANS_DATA_M_TU(Positive Transfer_Unit)
+uint32_t TRANS_DATA_M_TU(uint32_t Transfer_Unit)
 {
-  return Shift_Left(Word32(Transfer_Unit - 1), 25);
+	return ((Transfer_Unit - 1) << 25);
 }
-// --------------------------------------------------------------------------
+
 typedef struct t_Transcoder_Registers {
-	Registers.Registers_Index HTOTAL;
-	Registers.Registers_Index HBLANK;
-	Registers.Registers_Index HSYNC;
-	Registers.Registers_Index VTOTAL;
-	Registers.Registers_Index VBLANK;
-	Registers.Registers_Index VSYNC;
-	Registers.Registers_Index CONF;
-	Registers.Registers_Index DP_CTL;
-	Registers.Registers_Index DATA_M;
-	Registers.Registers_Index DATA_N;
-	Registers.Registers_Index LINK_M;
-	Registers.Registers_Index LINK_N;
-	Registers.Registers_Index CHICKEN2;
+	uint32_t HTOTAL;
+	uint32_t HBLANK;
+	uint32_t HSYNC;
+	uint32_t VTOTAL;
+	uint32_t VBLANK;
+	uint32_t VSYNC;
+	uint32_t CONF;
+	uint32_t DP_CTL;
+	uint32_t DATA_M;
+	uint32_t DATA_N;
+	uint32_t LINK_M;
+	uint32_t LINK_N;
+	uint32_t CHICKEN2;
 } Transcoder_Registers;
 
 typedef Transcoder_Registers Transcoder_Registers_Array[3];
 
 const Transcoder_Registers_Array TRANS = {
 	{
-		Registers.TRANS_HTOTAL_A,
-		Registers.TRANS_HBLANK_A,
-		Registers.TRANS_HSYNC_A,
-		Registers.TRANS_VTOTAL_A,
-		Registers.TRANS_VBLANK_A,
-		Registers.TRANS_VSYNC_A,
-		Registers.TRANSACONF,
-		Registers.TRANS_DP_CTL_A,
-		Registers.TRANSA_DATA_M1,
-		Registers.TRANSA_DATA_N1,
-		Registers.TRANSA_DP_LINK_M1,
-		Registers.TRANSA_DP_LINK_N1,
-		Registers.TRANSA_CHICKEN2
+		TRANS_HTOTAL_A,
+		TRANS_HBLANK_A,
+		TRANS_HSYNC_A,
+		TRANS_VTOTAL_A,
+		TRANS_VBLANK_A,
+		TRANS_VSYNC_A,
+		TRANSACONF,
+		TRANS_DP_CTL_A,
+		TRANSA_DATA_M1,
+		TRANSA_DATA_N1,
+		TRANSA_DP_LINK_M1,
+		TRANSA_DP_LINK_N1,
+		TRANSA_CHICKEN2
 	},
 	{
-		Registers.TRANS_HTOTAL_B,
-		Registers.TRANS_HBLANK_B,
-		Registers.TRANS_HSYNC_B,
-		Registers.TRANS_VTOTAL_B,
-		Registers.TRANS_VBLANK_B,
-		Registers.TRANS_VSYNC_B,
-		Registers.TRANSBCONF,
-		Registers.TRANS_DP_CTL_B,
-		Registers.TRANSB_DATA_M1,
-		Registers.TRANSB_DATA_N1,
-		Registers.TRANSB_DP_LINK_M1,
-		Registers.TRANSB_DP_LINK_N1,
-		Registers.TRANSB_CHICKEN2
+		TRANS_HTOTAL_B,
+		TRANS_HBLANK_B,
+		TRANS_HSYNC_B,
+		TRANS_VTOTAL_B,
+		TRANS_VBLANK_B,
+		TRANS_VSYNC_B,
+		TRANSBCONF,
+		TRANS_DP_CTL_B,
+		TRANSB_DATA_M1,
+		TRANSB_DATA_N1,
+		TRANSB_DP_LINK_M1,
+		TRANSB_DP_LINK_N1,
+		TRANSB_CHICKEN2
 	},
 	{
-		Registers.TRANS_HTOTAL_C,
-		Registers.TRANS_HBLANK_C,
-		Registers.TRANS_HSYNC_C,
-		Registers.TRANS_VTOTAL_C,
-		Registers.TRANS_VBLANK_C,
-		Registers.TRANS_VSYNC_C,
-		Registers.TRANSCCONF,
-		Registers.TRANS_DP_CTL_C,
-		Registers.TRANSC_DATA_M1,
-		Registers.TRANSC_DATA_N1,
-		Registers.TRANSC_DP_LINK_M1,
-		Registers.TRANSC_DP_LINK_N1,
-		Registers.TRANSC_CHICKEN2
+		TRANS_HTOTAL_C,
+		TRANS_HBLANK_C,
+		TRANS_HSYNC_C,
+		TRANS_VTOTAL_C,
+		TRANS_VBLANK_C,
+		TRANS_VSYNC_C,
+		TRANSCCONF,
+		TRANS_DP_CTL_C,
+		TRANSC_DATA_M1,
+		TRANSC_DATA_N1,
+		TRANSC_DP_LINK_M1,
+		TRANSC_DP_LINK_N1,
+		TRANSC_CHICKEN2
 	}
 };
 
-void On(Port_Config Port_Cfg, FDI_Port_Type Port, Word32 PLL)
+void On(Port_Config Port_Cfg, FDI_Port_Type Port, uint32_t PLL)
 {
 	const Mode_Type Mode = Port_Cfg.Mode;
-	Word32 Encode(Pos16 LSW, Pos16 MSW)
+	uint32_t Encode(uint16_t LSW, uint16_t MSW)
 	{
-		return (Word32(LSW) - 1) | ((Word32(MSW) - 1) << 16);
+		return ((uint32_t)(LSW) - 1) | (((uint32_t)(MSW) - 1) << 16);
 	}
 	
-	if(Config.Has_DPLL_SEL) {
-		Registers.Unset_And_Set_Mask(Registers.PCH_DPLL_SEL,
+	if(CONFIG_Has_DPLL_SEL) {
+		Registers.Unset_And_Set_Mask(PCH_DPLL_SEL,
 				DPLL_SEL_TRANSCODER_x_DPLL_SEL_MASK[Port],
 				DPLL_SEL_TRANSCODER_x_DPLL_ENABLE[Port] |
 				DPLL_SEL_TRANSCODER_x_DPLL_SEL(Port, PLL));
@@ -172,19 +172,19 @@ void On(Port_Config Port_Cfg, FDI_Port_Type Port, Word32 PLL)
 	Registers.Write(TRANS[Port].VSYNC, Encode(Mode.V_Sync_Begin, Mode.V_Sync_End));
 	
 	if(Port_Cfg.Display == DP) {
-		DP_Info.M_Type Data_M, Link_M;
-		DP_Info.N_Type Data_N, Link_N;
-		DP_Info.Calculate_M_N(Port_Cfg.DP, Port_Cfg.Mode, Data_M, Data_N, Link_M, Link_N);
-		Registers.Write(TRANS[Port].DATA_M, TRANS_DATA_M_TU(64) | Word32(Data_M));
-		Registers.Write(TRANS[Port].DATA_N, Word32(Data_N));
-		Registers.Write(TRANS[Port].LINK_M, Word32(Link_M));
-		Registers.Write(TRANS[Port].LINK_N, Word32(Link_N));
-		if(Config.Has_Trans_DP_Ctl) {
+		uint32_t Data_M, Link_M;
+		uint32_t Data_N, Link_N;
+		Calculate_M_N(Port_Cfg.DP, Port_Cfg.Mode, Data_M, Data_N, Link_M, Link_N);
+		Registers.Write(TRANS[Port].DATA_M, TRANS_DATA_M_TU(64) | (uint32_t)(Data_M));
+		Registers.Write(TRANS[Port].DATA_N, (uint32_t)(Data_N));
+		Registers.Write(TRANS[Port].LINK_M, (uint32_t)(Link_M));
+		Registers.Write(TRANS[Port].LINK_N, (uint32_t)(Link_N));
+		if(CONFIG_Has_Trans_DP_Ctl) {
 			// XXX Make conditional
-			const Word32 Polarity =
+			const uint32_t Polarity =
 					TRANS_DP_CTL_HSYNC_ACTIVE_HIGH |
 					TRANS_DP_CTL_VSYNC_ACTIVE_HIGH;
-			const Word32 Enhanced_Framing = TRANS_DP_CTL_ENHANCED_FRAMING;
+			const uint32_t Enhanced_Framing = TRANS_DP_CTL_ENHANCED_FRAMING;
 			Registers.Write(TRANS[Port].DP_CTL,
 					TRANS_DP_CTL_OUTPUT_ENABLE |
 					TRANS_DP_CTL_PORT_SELECT[Port_Cfg.PCH_Port] |
@@ -194,7 +194,7 @@ void On(Port_Config Port_Cfg, FDI_Port_Type Port, Word32 PLL)
 			);
 		}
 	}
-	if(Config.Has_Trans_Timing_Ovrrde) {
+	if(CONFIG_Has_Trans_Timing_Ovrrde) {
 		Registers.Set_Mask(TRANS[Port].CHICKEN2, TRANS_CHICKEN2_TIMING_OVERRIDE);
 	}
 	Registers.Write(TRANS[Port].CONF, TRANS_CONF_TRANSCODER_ENABLE);
@@ -204,15 +204,15 @@ void Off(FDI_Port_Type Port)
 {
 	Registers.Unset_Mask(TRANS[Port].CONF, TRANS_CONF_TRANSCODER_ENABLE);
 	Registers.Wait_Unset_Mask(TRANS[Port].CONF, TRANS_CONF_TRANSCODER_STATE, 50);
-	if(Config.Has_Trans_Timing_Ovrrde) {
+	if(CONFIG_Has_Trans_Timing_Ovrrde) {
 		Registers.Unset_Mask(TRANS[Port].CHICKEN2,
 				TRANS_CHICKEN2_TIMING_OVERRIDE);
 	}
-	if(Config.Has_Trans_DP_Ctl) {
+	if(CONFIG_Has_Trans_DP_Ctl) {
 		Registers.Write(TRANS[Port].DP_CTL, TRANS_DP_CTL_PORT_SELECT_NONE);
 	}
-	if(Config.Has_DPLL_SEL) {
-		Registers.Unset_Mask(Registers.PCH_DPLL_SEL,
+	if(CONFIG_Has_DPLL_SEL) {
+		Registers.Unset_Mask(PCH_DPLL_SEL,
 				DPLL_SEL_TRANSCODER_x_DPLL_ENABLE[Port]);
 	}
 }

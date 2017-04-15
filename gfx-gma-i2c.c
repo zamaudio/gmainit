@@ -55,17 +55,17 @@
 #define GMBUS4_INTERRUPT_MASK			(0x1f << 0)
 #define GMBUS5_2BYTE_INDEX_ENABLE		(1 << 31)
 
-Word32 GMBUS1_TOTAL_BYTE_COUNT(Transfer_Length Count)
+uint32_t GMBUS1_TOTAL_BYTE_COUNT(Transfer_Length Count)
 {
-	return (Word32(Count) << GMBUS1_TOTAL_BYTE_COUNT_SHIFT);
+	return ((uint32_t)(Count) << GMBUS1_TOTAL_BYTE_COUNT_SHIFT);
 }
 
-Word32 GMBUS1_SLAVE_ADDRESS(Transfer_Address Address)
+uint32_t GMBUS1_SLAVE_ADDRESS(Transfer_Address Address)
 {
-	return (Word32(Address) << GMBUS1_SLAVE_ADDRESS_SHIFT);
+	return ((uint32_t)(Address) << GMBUS1_SLAVE_ADDRESS_SHIFT);
 }
 
-Word32 GMBUS0_PIN_PAIR_SELECT(PCH_Port Port)
+uint32_t GMBUS0_PIN_PAIR_SELECT(PCH_Port Port)
 {
 	switch(Port) {
 	case PCH_DAC:
@@ -84,10 +84,10 @@ Word32 GMBUS0_PIN_PAIR_SELECT(PCH_Port Port)
 }
 
 // --------------------------------------------------------------------------
-Boolean GMBUS_Ready(void)
+bool GMBUS_Ready(void)
 {
-	Word32 GMBUS2;
-	Registers.Read(Registers.PCH_GMBUS2, &GMBUS2);
+	uint32_t GMBUS2;
+	Registers.Read(PCH_GMBUS2, &GMBUS2);
 	return (GMBUS2 & (
 			GMBUS2_HARDWARE_WAIT_PHASE |
 			GMBUS2_SLAVE_STALL_TIMEOUT_ERROR |
@@ -97,74 +97,74 @@ Boolean GMBUS_Ready(void)
 		) == 0;
 }
 
-Boolean Reset_GMBUS(void)
+bool Reset_GMBUS(void)
 {
-	Registers.Write(Registers.PCH_GMBUS1, GMBUS1_SOFTWARE_CLEAR_INTERRUPT);
-	Registers.Write(Registers.PCH_GMBUS1, 0);
-	Registers.Write(Registers.PCH_GMBUS0, GMBUS0_PIN_PAIR_SELECT_NONE);
+	Registers.Write(PCH_GMBUS1, GMBUS1_SOFTWARE_CLEAR_INTERRUPT);
+	Registers.Write(PCH_GMBUS1, 0);
+	Registers.Write(PCH_GMBUS0, GMBUS0_PIN_PAIR_SELECT_NONE);
 	return GMBUS_Ready();
 }
 
-Boolean Init_GMBUS(PCH_Port Port)
+bool Init_GMBUS(PCH_Port Port)
 {
-	Boolean Success;
+	bool Success;
 
-	if(Config.Ungate_GMBUS_Unit_Level) {
-	  Registers.Set_Mask(Registers.PCH_DSPCLK_GATE_D, PCH_DSPCLK_GATE_D_GMBUS_UNIT_LVL);
+	if(CONFIG_Ungate_GMBUS_Unit_Level) {
+	  Registers.Set_Mask(PCH_DSPCLK_GATE_D, PCH_DSPCLK_GATE_D_GMBUS_UNIT_LVL);
 	}
 	//  TODO: Refactor + check for timeout.
-	Registers.Wait_Unset_Mask(Registers.PCH_GMBUS2, GMBUS2_INUSE);
+	Registers.Wait_Unset_Mask(PCH_GMBUS2, GMBUS2_INUSE);
 	Success = GMBUS_Ready();
 	if(!Success) {
 		Success = Reset_GMBUS();
 	}
 	if(Success) {
-	  Registers.Write(Registers.PCH_GMBUS0, GMBUS0_GMBUS_RATE_SELECT_100KHZ |
+	  Registers.Write(PCH_GMBUS0, GMBUS0_GMBUS_RATE_SELECT_100KHZ |
 	  					GMBUS0_PIN_PAIR_SELECT(Port));
-	  Registers.Write(Registers.PCH_GMBUS4, 0);
-	  Registers.Write(Registers.PCH_GMBUS5, 0);
+	  Registers.Write(PCH_GMBUS4, 0);
+	  Registers.Write(PCH_GMBUS5, 0);
 	}
 	return Success;
 }
 
 void Release_GMBUS( void )
 {
-	Registers.Write(Registers.PCH_GMBUS0, GMBUS0_PIN_PAIR_SELECT_NONE);
+	Registers.Write(PCH_GMBUS0, GMBUS0_PIN_PAIR_SELECT_NONE);
 	//  Clear INUSE. TODO: Don't do it, if timeout occured (see above).
-	Registers.Write(Registers.PCH_GMBUS2, GMBUS2_INUSE);
-	if(Config.Ungate_GMBUS_Unit_Level) {
-		Registers.Unset_Mask(Registers.PCH_DSPCLK_GATE_D,
+	Registers.Write(PCH_GMBUS2, GMBUS2_INUSE);
+	if(CONFIG_Ungate_GMBUS_Unit_Level) {
+		Registers.Unset_Mask(PCH_DSPCLK_GATE_D,
 				PCH_DSPCLK_GATE_D_GMBUS_UNIT_LVL);
 	}
 }
 
-Boolean I2C_Read(PCH_Port Port, Transfer_Address Address, Transfer_Length *Length, Transfer_Data *Data)
+bool I2C_Read(PCH_Port Port, Transfer_Address Address, Transfer_Length *Length, Transfer_Data *Data)
 {
-	Boolean Success;
-	Word32 GMBUS2, GMBUS3;
+	bool Success;
+	uint32_t GMBUS2, GMBUS3;
 	Transfer_Length Current;
 	Transfer_Length Transfered = 0;
 	//Data = (/* others => */ 0);
 	Success = Init_GMBUS(Port);
 	if(Success) {
-		Registers.Write(Registers.PCH_GMBUS1,
+		Registers.Write(PCH_GMBUS1,
 				GMBUS1_SOFTWARE_READY |
 				GMBUS1_BUS_CYCLE_INDEX |
 				GMBUS1_BUS_CYCLE_WAIT |
 				GMBUS1_TOTAL_BYTE_COUNT(*Length) |
 				GMBUS1_SLAVE_ADDRESS(Address) |
 				GMBUS1_DIRECTION_READ);
-		while( Success && Transfered < Length)
+		while( Success && Transfered < *Length)
 		{
-			Registers.Wait_Set_Mask(Registers.PCH_GMBUS2, GMBUS2_HARDWARE_READY, 55);
-			Registers.Read(Registers.PCH_GMBUS2, &GMBUS2);
+			Registers.Wait_Set_Mask(PCH_GMBUS2, GMBUS2_HARDWARE_READY, 55);
+			Registers.Read(PCH_GMBUS2, &GMBUS2);
 			Success = ((GMBUS2 & GMBUS2_HARDWARE_READY) != 0) &&
 					((GMBUS2 & GMBUS2_NAK_INDICATOR) == 0);
 			if(Success) {
-				Current = min(Length, Transfered + 4);
-				Registers.Read(Registers.PCH_GMBUS3, GMBUS3);
+				Current = min(*Length, Transfered + 4);
+				Registers.Read(PCH_GMBUS3, GMBUS3);
 				for( int I = Transfered; I < Current; I++) {
-					Data[I] = Byte(GMBUS3 & 0xff);
+					(*Data)[I] = (uint8_t)(GMBUS3 & 0xff);
 					GMBUS3 = GMBUS3 >> 8;
 				}
 				Transfered = Current;
@@ -172,13 +172,13 @@ Boolean I2C_Read(PCH_Port Port, Transfer_Address Address, Transfer_Length *Lengt
 		}
 
 		if(Success) {
-			Registers.Wait_Set_Mask(Registers.PCH_GMBUS2, GMBUS2_HARDWARE_WAIT_PHASE);
-			Registers.Write(Registers.PCH_GMBUS1, GMBUS1_SOFTWARE_READY |
+			Registers.Wait_Set_Mask(PCH_GMBUS2, GMBUS2_HARDWARE_WAIT_PHASE);
+			Registers.Write(PCH_GMBUS1, GMBUS1_SOFTWARE_READY |
 								GMBUS1_BUS_CYCLE_STOP);
-			Registers.Wait_Unset_Mask(Registers.PCH_GMBUS2, GMBUS2_GMBUS_ACTIVE);
+			Registers.Wait_Unset_Mask(PCH_GMBUS2, GMBUS2_GMBUS_ACTIVE);
 		}
 	}
-	Length = Transfered;
+	*Length = Transfered;
 	Release_GMBUS();
 	return Success;
 }

@@ -16,6 +16,9 @@
 #ifndef GFX_FRAMEBUFFER_FILLER_H
 #define GFX_FRAMEBUFFER_FILLER_H
 
-void Fill(Word64 Linear_FB, Framebuffer_Type Framebuffer);
+#include <inttypes.h>
+#include "gfx.h"
+
+void Fill(uint64_t Linear_FB, Framebuffer_Type Framebuffer);
 
 #endif

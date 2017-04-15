@@ -32,7 +32,7 @@
 #define TP_SHIFT				8
 #define FDI_RX_CTL_TRAINING_PATTERN_MASK	(3 << TP_SHIFT)
 
-typedef Word32 TP_Array[4];
+typedef uint32_t TP_Array[4];
 
 const TP_Array FDI_RX_CTL_TRAINING_PATTERN = {
 	0 << TP_SHIFT,
@@ -41,12 +41,12 @@ const TP_Array FDI_RX_CTL_TRAINING_PATTERN = {
 	3 << TP_SHIFT
 };
 
-Word32 FDI_RX_CTL_PORT_WIDTH_SEL(DP_Lane_Count Lane_Count)
+uint32_t FDI_RX_CTL_PORT_WIDTH_SEL(DP_Lane_Count Lane_Count)
 {
-	return ((Word32(Lane_Count_As_Integer(Lane_Count)) - 1) << FDI_RX_CTL_PORT_WIDTH_SEL_SHIFT);
+	return (((uint32_t)(Lane_Count_As_Integer[Lane_Count]) - 1) << FDI_RX_CTL_PORT_WIDTH_SEL_SHIFT);
 }
 
-Word32 FDI_RX_CTL_BPC(BPC_Type BPC)
+uint32_t FDI_RX_CTL_BPC(BPC_Type BPC)
 {
 	switch(BPC) {
 	case 6:
@@ -67,19 +67,19 @@ Word32 FDI_RX_CTL_BPC(BPC_Type BPC)
 #define FDI_RX_MISC_TP1_TO_TP2_TIME_48		(2 << 20)
 #define FDI_RX_MISC_FDI_DELAY_90		90
 
-Word32 FDI_RX_MISC_FDI_RX_PWRDN_LANE1(Word32 Value)
+uint32_t FDI_RX_MISC_FDI_RX_PWRDN_LANE1(uint32_t Value)
 {
 	return (Value << FDI_RX_MISC_FDI_RX_PWRDN_LANE1_SHIFT);
 }
 
-Word32 FDI_RX_MISC_FDI_RX_PWRDN_LANE0(Word32 Value)
+uint32_t FDI_RX_MISC_FDI_RX_PWRDN_LANE0(uint32_t Value)
 {
 	return (Value << FDI_RX_MISC_FDI_RX_PWRDN_LANE0_SHIFT);
 }
 
 #define FDI_RX_TUSIZE_SHIFT			25
 
-Word32 FDI_RX_TUSIZE(Word32 Value)
+uint32_t FDI_RX_TUSIZE(uint32_t Value)
 {
 	return ((Value - 1) << FDI_RX_TUSIZE_SHIFT);
 }
@@ -90,44 +90,44 @@ Word32 FDI_RX_TUSIZE(Word32 Value)
 
 typedef struct t_FDI_Registers
 {
-	Registers.Registers_Index RX_CTL;
-	Registers.Registers_Index RX_MISC;
-	Registers.Registers_Index RX_TUSIZE;
-	Registers.Registers_Index RX_IMR;
-	Registers.Registers_Index RX_IIR;
+	uint32_t RX_CTL;
+	uint32_t RX_MISC;
+	uint32_t RX_TUSIZE;
+	uint32_t RX_IMR;
+	uint32_t RX_IIR;
 } FDI_Registers;
 
 typedef FDI_Registers FDI_Registers_Array[3];
 
 const FDI_Registers_Array FDI_Regs = {
 	{
-		Registers.FDI_RXA_CTL,
-		Registers.FDI_RX_MISC_A,
-		Registers.FDI_RXA_TUSIZE1,
-		Registers.FDI_RXA_IMR,
-		Registers.FDI_RXA_IIR
+		FDI_RXA_CTL,
+		FDI_RX_MISC_A,
+		FDI_RXA_TUSIZE1,
+		FDI_RXA_IMR,
+		FDI_RXA_IIR
 	},
 	{
-		Registers.FDI_RXB_CTL,
-		Registers.FDI_RX_MISC_B,
-		Registers.FDI_RXB_TUSIZE1,
-		Registers.FDI_RXB_IMR, 
-		Registers.FDI_RXB_IIR
+		FDI_RXB_CTL,
+		FDI_RX_MISC_B,
+		FDI_RXB_TUSIZE1,
+		FDI_RXB_IMR, 
+		FDI_RXB_IIR
 	},
 	{
-		Registers.FDI_RXC_CTL,
-		Registers.FDI_RX_MISC_C,
-		Registers.FDI_RXC_TUSIZE1,
-		Registers.FDI_RXC_IMR,
-		Registers.FDI_RXC_IIR
+		FDI_RXC_CTL,
+		FDI_RX_MISC_C,
+		FDI_RXC_TUSIZE1,
+		FDI_RXC_IMR,
+		FDI_RXC_IIR
 	}
 };
 
-void Pre_Train(PCH.FDI_Port_Type Port, Port_Config Port_Cfg)
+void Pre_Train(FDI_Port_Type Port, Port_Config Port_Cfg)
 {
-	const Word32 Power_Down_Lane_Bits = FDI_RX_MISC_FDI_RX_PWRDN_LANE1(2) |
+	const uint32_t Power_Down_Lane_Bits = FDI_RX_MISC_FDI_RX_PWRDN_LANE1(2) |
 			FDI_RX_MISC_FDI_RX_PWRDN_LANE0(2);
-	const Word32 RX_CTL_Settings =
+	const uint32_t RX_CTL_Settings =
 			FDI_RX_CTL_PORT_WIDTH_SEL(Port_Cfg.FDI.Lane_Count) |
 			FDI_RX_CTL_BPC(Port_Cfg.Mode.BPC) |
 			FDI_RX_CTL_COMPOSITE_SYNC_SELECT |
@@ -159,12 +159,12 @@ void Pre_Train(PCH.FDI_Port_Type Port, Port_Config Port_Cfg)
 	Registers.Set_Mask(FDI_Regs[Port].RX_CTL, FDI_RX_CTL_RAWCLK_TO_PCDCLK_SEL_PCDCLK);
 }
 
-Boolean Train(PCH.FDI_Port_Type Port, Training_Pattern TP)
+bool Train(FDI_Port_Type Port, Training_Pattern TP)
 {
-	Boolean Success = False;
-	const Word32 Lock_Bit = (TP == TP_1) ? FDI_RX_BIT_LOCK : FDI_RX_SYMBOL_LOCK;
+	bool Success = false;
+	const uint32_t Lock_Bit = (TP == TP_1) ? FDI_RX_BIT_LOCK : FDI_RX_SYMBOL_LOCK;
 	
-	Boolean Check_Lock(Word32 Lock_Bit)
+	bool Check_Lock(uint32_t Lock_Bit)
 	{
 		for( int I = 0; I < 5; I++)
 		{
@@ -197,19 +197,19 @@ Boolean Train(PCH.FDI_Port_Type Port, Training_Pattern TP)
 		}
 	} else {
 		udelay(31);
-		Success = True;
+		Success = true;
 	}
 	return Success;
 }
 
-void Auto_Train(PCH.FDI_Port_Type Port)
+void Auto_Train(FDI_Port_Type Port)
 {
 	Registers.Set_Mask(FDI_Regs[Port].RX_CTL,
 			FDI_RX_CTL_FDI_RX_ENABLE |
 			FDI_RX_CTL_FDI_AUTO_TRAIN
 	);
 	Registers.Posting_Read(FDI_Regs[Port].RX_CTL);
-	if(Config.Has_FDI_RX_Power_Down) {
+	if(CONFIG_Has_FDI_RX_Power_Down) {
 		udelay(30);
 		Registers.Unset_And_Set_Mask(FDI_Regs[Port].RX_MISC,
 				FDI_RX_MISC_FDI_RX_PWRDN_LANE1_MASK |
@@ -222,18 +222,18 @@ void Auto_Train(PCH.FDI_Port_Type Port)
 	udelay(5);
 }
 
-void Enable_EC(PCH.FDI_Port_Type Port)
+void Enable_EC(FDI_Port_Type Port)
 {
 	Registers.Set_Mask(FDI_Regs[Port].RX_CTL,
 			FDI_RX_CTL_FS_ERROR_CORRECTION_ENABLE |
 			FDI_RX_CTL_FE_ERROR_CORRECTION_ENABLE);
 }
 
-void Off(PCH.FDI_Port_Type Port, Off_Type OT)
+void Off(FDI_Port_Type Port, Off_Type OT)
 {
 	Registers.Unset_Mask(FDI_Regs[Port].RX_CTL,
 			FDI_RX_CTL_FDI_RX_ENABLE | FDI_RX_CTL_FDI_AUTO_TRAIN);
-	if(Config.Has_FDI_RX_Power_Down && (OT >= Lanes_Off)) {
+	if(CONFIG_Has_FDI_RX_Power_Down && (OT >= Lanes_Off)) {
 		Registers.Unset_And_Set_Mask(FDI_Regs[Port].RX_MISC,
 				FDI_RX_MISC_FDI_RX_PWRDN_LANE1_MASK |
 				FDI_RX_MISC_FDI_RX_PWRDN_LANE0_MASK,

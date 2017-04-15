@@ -13,6 +13,8 @@
  * GNU General Public License for more details.
  */
 
+#include <stdbool.h>
+
 typedef enum {
 	VS_Level_0,
 	VS_Level_1,
@@ -41,30 +43,30 @@ typedef enum {
 } Training_Pattern;
 
 typedef struct {
-	Boolean CR_Done;
-	Boolean Channel_EQ_Done;
-	Boolean Symbol_Locked;
-	Boolean Reserved;
+	bool CR_Done;
+	bool Channel_EQ_Done;
+	bool Symbol_Locked;
+	bool Reserved;
 } Lane_Status;
 
-typedef struct Lane_Status Lanes_Status[4];
+typedef Lane_Status Lanes_Status[4];
 
 typedef struct {
 	DP_Voltage_Swing Voltage_Swing;
 	DP_Pre_Emph Pre_Emph;
 } Adjust_Request;
 
-typedef struct Adjust_Request Adjust_Requests_Array[4];
+typedef Adjust_Request Adjust_Requests_Array[4];
 
 typedef struct {
 	union {
-		Lanes_Status;
-		Boolean Lanes[16];
+		Lanes_Status Lanes_Status;
+		bool Lanes[16];
 	};
-	Boolean Interlane_Align_Done;
+	bool Interlane_Align_Done;
 	union {
-		Adjust_Requests_Array;
-		Boolean Adjust_Requests[16];
+		Adjust_Requests_Array Adjust_Requests_Array;
+		bool Adjust_Requests[16];
 	};
 } Link_Status;
 

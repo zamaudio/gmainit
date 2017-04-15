@@ -17,6 +17,8 @@
 #define GFX_GMA_REGISTERS_H
 
 #include "gfx-gma.h"
+#define INVALID_REGISTER		0x000000
+
 // -------------------------------------------------------------------------
 //  Pipe A registers
 // -------------------------------------------------------------------------
@@ -495,50 +497,50 @@
 #define GT_MODE 			0x0020d0
 #define QUIRK_F0060 			0x0f0060
 #define QUIRK_F1060 			0x0f1060
-#define QUIRK_F2060 			0x0f2060
-#define AUD_CNTRL_ST2 			0x0e50c0
-#define AUD_CNTL_ST_A 			0x0e50b4
-#define AUD_CNTL_ST_B 			0x0e51b4
-#define AUD_CNTL_ST_C 			0x0e52b4
-#define AUD_HDMIW_HDMIEDID_A 		0x0e5050
-#define AUD_HDMIW_HDMIEDID_B 		0x0e5150
-#define AUD_HDMIW_HDMIEDID_C 		0x0e5250
-#define AUD_CONFIG_A 			0x0e5000
-#define AUD_CONFIG_B 			0x0e5100
-#define AUD_CONFIG_C 			0x0e5200
-#define TRANS_DP_CTL_A 			0x0e0300
-#define TRANS_DP_CTL_B 			0x0e1300
-#define TRANS_DP_CTL_C 			0x0e2300
-#define TRANS_VSYNCSHIFT_A 		0x0e0028
-#define TRANS_VSYNCSHIFT_B 		0x0e1028
-#define TRANS_VSYNCSHIFT_C 		0x0e2028
-#define PCH_RAWCLK_FREQ 		0x0c6204
+#define QUIRK_F2060			0x0f2060
+#define AUD_CNTRL_ST2			0x0e50c0
+#define AUD_CNTL_ST_A			0x0e50b4
+#define AUD_CNTL_ST_B			0x0e51b4
+#define AUD_CNTL_ST_C			0x0e52b4
+#define AUD_HDMIW_HDMIEDID_A		0x0e5050
+#define AUD_HDMIW_HDMIEDID_B		0x0e5150
+#define AUD_HDMIW_HDMIEDID_C		0x0e5250
+#define AUD_CONFIG_A			0x0e5000
+#define AUD_CONFIG_B			0x0e5100
+#define AUD_CONFIG_C			0x0e5200
+#define TRANS_DP_CTL_A			0x0e0300
+#define TRANS_DP_CTL_B			0x0e1300
+#define TRANS_DP_CTL_C			0x0e2300
+#define TRANS_VSYNCSHIFT_A		0x0e0028
+#define TRANS_VSYNCSHIFT_B		0x0e1028
+#define TRANS_VSYNCSHIFT_C		0x0e2028
+#define PCH_RAWCLK_FREQ			0x0c6204
 #define QUIRK_C2004 			0x0c2004
 
 #define Default_Timeout_MS		10
 
-typedef Word32 Registers_Index;
+typedef uint32_t Registers_Index;
 //  aliased registers
-const Registers_Index DP_CTL_A = DDI_BUF_CTL_A;
-const Registers_Index DP_AUX_CTL_A = DDI_AUX_CTL_A;
-const Registers_Index DP_AUX_DATA_A_1 = DDI_AUX_DATA_A_1;
-const Registers_Index DP_AUX_DATA_A_2 = DDI_AUX_DATA_A_2;
-const Registers_Index DP_AUX_DATA_A_3 = DDI_AUX_DATA_A_3;
-const Registers_Index DP_AUX_DATA_A_4 = DDI_AUX_DATA_A_4;
-const Registers_Index DP_AUX_DATA_A_5 = DDI_AUX_DATA_A_5;
-const Registers_Index ILK_DISPLAY_CHICKEN1 = FUSE_STATUS;
+#define DP_CTL_A			DDI_BUF_CTL_A
+#define DP_AUX_CTL_A			DDI_AUX_CTL_A
+#define DP_AUX_DATA_A_1			DDI_AUX_DATA_A_1
+#define DP_AUX_DATA_A_2			DDI_AUX_DATA_A_2
+#define DP_AUX_DATA_A_3			DDI_AUX_DATA_A_3
+#define DP_AUX_DATA_A_4			DDI_AUX_DATA_A_4
+#define DP_AUX_DATA_A_5			DDI_AUX_DATA_A_5
+#define ILK_DISPLAY_CHICKEN1		FUSE_STATUS
 
 void Posting_Read(Registers_Index Register);
-void Read(Registers_Index Register, Word32 *Value, Boolean Verbose:= True);
-void Write(Registers_Index Register, Word32 Value);
-void Is_Set_Mask(Registers_Index Register, Word32 Mask, Boolean *Result);
-void Wait(Registers_Index Register, Word32 Mask, Word32 Value, Natural TOut_MS:= Default_Timeout_MS, Boolean Verbose:= False);
-void Wait_Set_Mask(Registers_Index Register, Word32 Mask, Natural TOut_MS:= Default_Timeout_MS, Boolean Verbose:= False);
-void Wait_Unset_Mask(Registers_Index Register, Word32 Mask, Natural TOut_MS:= Default_Timeout_MS, Boolean Verbose:= False);
-void Set_Mask(Registers_Index Register, Word32 Mask);
-void Unset_Mask(Registers_Index Register, Word32 Mask);
-void Unset_And_Set_Mask(Registers_Index Register, Word32 Mask_Unset, Word32 Mask_Set);
-void Write_GTT(GTT_Range GTT_Page, GTT_Address_Type Device_Address, Boolean Valid);
-void Set_Register_Base(Word64 Base);
+void Read(Registers_Index Register, uint32_t *Value, bool Verbose);
+void Write(Registers_Index Register, uint32_t Value);
+void Is_Set_Mask(Registers_Index Register, uint32_t Mask, bool *Result);
+void Wait(Registers_Index Register, uint32_t Mask, uint32_t Value, uint32_t TOut_MS, bool Verbose);
+void Wait_Set_Mask(Registers_Index Register, uint32_t Mask, uint32_t TOut_MS, bool Verbose);
+void Wait_Unset_Mask(Registers_Index Register, uint32_t Mask, uint32_t TOut_MS, bool Verbose);
+void Set_Mask(Registers_Index Register, uint32_t Mask);
+void Unset_Mask(Registers_Index Register, uint32_t Mask);
+void Unset_And_Set_Mask(Registers_Index Register, uint32_t Mask_Unset, uint32_t Mask_Set);
+void Write_GTT(GTT_Range GTT_Page, GTT_Address_Type Device_Address, bool Valid);
+void Set_Register_Base(uint64_t Base);
 
 #endif

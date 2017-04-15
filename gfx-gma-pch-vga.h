@@ -16,6 +16,9 @@
 #ifndef GFX_GMA_PCH_VGA_H
 #define GFX_GMA_PCH_VGA_H
 
+#include "gfx-gma-pch.h"
+#include "gfx.h"
+
 void On(FDI_Port_Type Port, Mode_Type Mode);
 void Off( void );
 void Clock_On(Mode_Type Mode);

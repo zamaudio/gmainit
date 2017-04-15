@@ -16,17 +16,19 @@
 #ifndef GFX_GMA_PANEL_H
 #define GFX_GMA_PANEL_H
 
+#include <stdbool.h>
+#include <inttypes.h>
 #include "gfx-gma-registers.h"
 
 void Static_Init( void );
-void Setup_PP_Sequencer(Boolean Default_Delays);
+void Setup_PP_Sequencer(bool Default_Delays);
 void VDD_Override( void );
-void On(Boolean Wait);
+void On(bool Wait);
 void Wait_On( void );
 void Off( void );
 void Backlight_On( void );
 void Backlight_Off( void );
-void Set_Backlight(Word16 Level);
-void Get_Max_Backlight(Word16 *Level);
+void Set_Backlight(uint16_t Level);
+void Get_Max_Backlight(uint16_t *Level);
 
 #endif

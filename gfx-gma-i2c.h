@@ -16,8 +16,10 @@
 #ifndef GFX_GMA_I2C_H
 #define GFX_GMA_I2C_H
 
+#include <stdbool.h>
 #include "gfx-i2c.h"
+#include "gfx-gma.h"
 
-Boolean I2C_Read(PCH_Port Port, Transfer_Address Address, Transfer_Length *Length, Transfer_Data *Data);
+bool I2C_Read(PCH_Port Port, Transfer_Address Address, Transfer_Length *Length, Transfer_Data *Data);
 
 #endif

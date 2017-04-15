@@ -16,9 +16,11 @@
 #ifndef GFX_GMA_DISPLAY_PROBING_H
 #define GFX_GMA_DISPLAY_PROBING_H
 
+#include <stdbool.h>
+
 typedef int Port_List_Range;
 typedef Port_Type Port_List[8];
 const Port_List All_Ports = { DP1, DP2, DP3, HDMI1, HDMI2, HDMI3, Analog, Internal };
-void Scan_Ports(Pipe_Configs *Configs, Port_List Ports, Pipe_Index Max_Pipe, Boolean Keep_Power);
+void Scan_Ports(Pipe_Configs *Configs, Port_List Ports, Pipe_Index Max_Pipe, bool Keep_Power);
 
 #endif

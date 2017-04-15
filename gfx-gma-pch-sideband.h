@@ -16,6 +16,8 @@
 #ifndef GFX_GMA_PCH_SIDEBAND_H
 #define GFX_GMA_PCH_SIDEBAND_H
 
+#include <inttypes.h>
+
 typedef enum {
 	SBI_ICLK,
 	SBI_MPHY
@@ -27,10 +29,10 @@ typedef enum {
 	SBI_SSCAUXDIV
 } Register_Type;
 
-void Read(Destination_Type Dest, Register_Type Register, Word32 *Value);
-void Write(Destination_Type Dest, Register_Type Register, Word32 Value);
-void Unset_Mask(Destination_Type Dest, Register_Type Register, Word32 Mask);
-void Set_Mask(Destination_Type Dest, Register_Type Register, Word32 Mask);
-void Unset_And_Set_Mask(Destination_Type Dest, Register_Type Register, Word32 Mask_Unset, Word32 Mask_Set);
+void sideband_Read(Destination_Type Dest, Register_Type Register, uint32_t *Value);
+void sideband_Write(Destination_Type Dest, Register_Type Register, uint32_t Value);
+void sideband_Unset_Mask(Destination_Type Dest, Register_Type Register, uint32_t Mask);
+void sideband_Set_Mask(Destination_Type Dest, Register_Type Register, uint32_t Mask);
+void sideband_Unset_And_Set_Mask(Destination_Type Dest, Register_Type Register, uint32_t Mask_Unset, uint32_t Mask_Set);
 
 #endif

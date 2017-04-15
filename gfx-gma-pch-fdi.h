@@ -16,6 +16,8 @@
 #ifndef GFX_GMA_PCH_FDI_H
 #define GFX_GMA_PCH_FDI_H
 
+#include "gfx-gma-pch.h"
+
 typedef enum {
 	TP_1,
 	TP_2,
@@ -23,10 +25,10 @@ typedef enum {
 	TP_None
 } Training_Pattern;
 
-void Pre_Train(PCH.FDI_Port_Type Port, Port_Config Port_Cfg);
-Boolean Train(PCH.FDI_Port_Type Port, Training_Pattern TP);
-void Auto_Train(PCH.FDI_Port_Type Port);
-void Enable_EC(PCH.FDI_Port_Type Port);
+void Pre_Train(FDI_Port_Type Port, Port_Config Port_Cfg);
+bool Train(FDI_Port_Type Port, Training_Pattern TP);
+void Auto_Train(FDI_Port_Type Port);
+void Enable_EC(FDI_Port_Type Port);
 
 typedef enum {
 	Rx_Off,
@@ -34,6 +36,6 @@ typedef enum {
 	Clock_Off
 } Off_Type;
 
-void Off(PCH.FDI_Port_Type Port, Off_Type OT);
+void Off(FDI_Port_Type Port, Off_Type OT);
 
 #endif

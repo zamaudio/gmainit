@@ -13,42 +13,46 @@
  * GNU General Public License for more details.
  */
 
-Boolean Preferred_Link_Setting(struct Port_Config *Port_Cfg)
+#include <stdbool.h>
+#include <inttypes.h>
+#include "gfx-gma.h"
+
+bool Preferred_Link_Setting(Port_Config *Port_Cfg)
 {
-	Boolean Success;
-	const GMA.DP_Port DP_Port = DP_A;
+	bool Success;
+	const DP_Port DP_Port = DP_A;
 	
-	if(Port_Cfg.Display == DP) {
-		if(Port_Cfg.Port == DIGI_A) {
-			if(GMA.Config.Use_PP_VDD_Override) {
-				Panel.VDD_Override();
+	if(Port_Cfg->Display == DP) {
+		if(Port_Cfg->Port == DIGI_A) {
+			if(CONFIG_Use_PP_VDD_Override) {
+				panel_VDD_Override();
 			} else {
-				Panel.On();
+				panel_On();
 			}
 		}
-		Success = DP_Info.Read_Caps(Port_Cfg.DP, DP_Port);
+		Success = dpinfo_Read_Caps(Port_Cfg->DP, DP_Port);
 		if(Success) {
-			DP_Info.Preferred_Link_Setting(Port_Cfg.DP, Port_Cfg.Mode);
+			dpinfo_Preferred_Link_Setting(Port_Cfg->DP, Port_Cfg->Mode);
 		}
 	} else {
-		Success = True;
+		Success = true;
 	}
 	return Success;
 }
 
-Boolean Next_Link_Setting(Port_Config *Port_Cfg)
+bool Next_Link_Setting(Port_Config *Port_Cfg)
 {
-	Boolean Success;
+	bool Success;
 
-	if(Port_Cfg.Display == DP) {
-		Success = DP_Info.Next_Link_Setting(Port_Cfg.DP, Port_Cfg.Mode);
+	if(Port_Cfg->Display == DP) {
+		Success = dpinfo_Next_Link_Setting(Port_Cfg->DP, Port_Cfg->Mode);
 	} else {
-		Success = False;
+		Success = false;
 	}
 	return Success;
 }
 
-Byte Default_BPC(Port_Config Port_Cfg)
+uint8_t Default_BPC(Port_Config Port_Cfg)
 {
 	if( (Port_Cfg.Port == DIGI_A) ||
 			(Port_Cfg.Is_FDI && (Port_Cfg.PCH_Port == PCH_LVDS)) ) {

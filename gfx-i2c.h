@@ -16,9 +16,11 @@
 #ifndef GFX_I2C_H
 #define GFX_I2C_H
 
+#include <inttypes.h>
+
 typedef int Transfer_Address;
-typedef Natural Transfer_Length;
-typedef Natural Transfer_Index;
+typedef uint32_t Transfer_Length;
+typedef uint32_t Transfer_Index;
 typedef Transfer_Index Transfer_Data[];
 
 #endif

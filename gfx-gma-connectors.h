@@ -16,8 +16,11 @@
 #ifndef GFX_GMA_CONNECTORS_H
 #define GFX_GMA_CONNECTORS_H
 
-Boolean Pre_On(Pipe_Index Pipe, Port_Config Port_Cfg, Word32 PLL_Hint);
-Boolean Post_On(Port_Config Port_Cfg, Word32 PLL_Hint);
+#include <inttypes.h>
+#include "gfx-gma.h"
+
+bool Pre_On(Pipe_Index Pipe, Port_Config Port_Cfg, uint32_t PLL_Hint);
+bool Post_On(Port_Config Port_Cfg, uint32_t PLL_Hint);
 void Pre_Off(Port_Config Port_Cfg);
 void Post_Off(Port_Config Port_Cfg);
 void Pre_All_Off( void );

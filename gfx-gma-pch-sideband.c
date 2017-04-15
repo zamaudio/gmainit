@@ -29,7 +29,7 @@
 #define SBI_SSCCTL6			0x060c0000
 #define SBI_SSCAUXDIV			0x06100000
 
-typedef Word32 Register_Array[];
+typedef uint32_t Register_Array[];
 
 const Register_Array Register_Addr = {
 	SBI_SSCDIVINTPHASE6,
@@ -37,61 +37,61 @@ const Register_Array Register_Addr = {
 	SBI_SSCAUXDIV
 };
 
-void Read(Destination_Type Dest, Register_Type Register, Word32 *Value)
+void sideband_Read(Destination_Type Dest, Register_Type Register, uint32_t *Value)
 {
-	Registers.Wait_Unset_Mask(Registers.SBI_CTL_STAT, SBI_BUSY);
-	Registers.Write(Registers.SBI_ADDR, Register_Addr[Register]);
+	Registers.Wait_Unset_Mask(SBI_CTL_STAT, SBI_BUSY);
+	Registers.Write(SBI_ADDR, Register_Addr[Register]);
 	if(Dest == SBI_ICLK) {
-		Registers.Write(Registers.SBI_CTL_STAT,
+		Registers.Write(SBI_CTL_STAT,
 				SBI_CTL_DEST_ICLK |
 				SBI_CTL_OP_CRRD |
 				SBI_BUSY);
 	} else {
-		Registers.Write(Registers.SBI_CTL_STAT,
+		Registers.Write(SBI_CTL_STAT,
 				SBI_CTL_DEST_MPHY |
 				SBI_CTL_OP_IORD |
 				SBI_BUSY);
 	}
-	Registers.Wait_Unset_Mask(Registers.SBI_CTL_STAT, SBI_BUSY);
-	Registers.Read(Registers.SBI_DATA, Value);
+	Registers.Wait_Unset_Mask(SBI_CTL_STAT, SBI_BUSY);
+	Registers.Read(SBI_DATA, Value);
 }
 
-void Write(Destination_Type Dest, Register_Type Register, Word32 Value)
+void sideband_Write(Destination_Type Dest, Register_Type Register, uint32_t Value)
 {
-	Registers.Wait_Unset_Mask(Registers.SBI_CTL_STAT, SBI_BUSY);
-	Registers.Write(Registers.SBI_ADDR, Register_Addr[Register]);
-	Registers.Write(Registers.SBI_DATA, Value);
+	Registers.Wait_Unset_Mask(SBI_CTL_STAT, SBI_BUSY);
+	Registers.Write(SBI_ADDR, Register_Addr[Register]);
+	Registers.Write(SBI_DATA, Value);
 	if(Dest == SBI_ICLK) {
-		Registers.Write(Registers.SBI_CTL_STAT,
+		Registers.Write(SBI_CTL_STAT,
 				SBI_CTL_DEST_ICLK |
 				SBI_CTL_OP_CRWR |
 				SBI_BUSY);
 	} else {
-		Registers.Write(Registers.SBI_CTL_STAT,
+		Registers.Write(SBI_CTL_STAT,
 				SBI_CTL_DEST_MPHY |
 				SBI_CTL_OP_IOWR |
 				SBI_BUSY);
 	}
-	Registers.Wait_Unset_Mask(Registers.SBI_CTL_STAT, SBI_BUSY);
+	Registers.Wait_Unset_Mask(SBI_CTL_STAT, SBI_BUSY);
 }
 
-void Unset_Mask(Destination_Type Dest, Register_Type Register, Word32 Mask)
+void sideband_Unset_Mask(Destination_Type Dest, Register_Type Register, uint32_t Mask)
 {
-	Word32 Value;
-	Read(Dest, Register, Value);
-	Write(Dest, Register, Value & ~Mask);
+	uint32_t Value;
+	sideband_Read(Dest, Register, &Value);
+	sideband_Write(Dest, Register, Value & ~Mask);
 }
 
-void Set_Mask(Destination_Type Dest, Register_Type Register, Word32 Mask)
+void sideband_Set_Mask(Destination_Type Dest, Register_Type Register, uint32_t Mask)
 {
-	Word32 Value;
-	Read(Dest, Register, Value);
-	Write(Dest, Register, Value | Mask);
+	uint32_t Value;
+	sideband_Read(Dest, Register, &Value);
+	sideband_Write(Dest, Register, Value | Mask);
 }
 
-void Unset_And_Set_Mask(Destination_Type Dest, Register_Type Register, Word32 Mask_Unset, Word32 Mask_Set)
+void sideband_Unset_And_Set_Mask(Destination_Type Dest, Register_Type Register, uint32_t Mask_Unset, uint32_t Mask_Set)
 {
-	Word32 Value;
-	Read(Dest, Register, Value);
-	Write(Dest, Register, (Value & ~Mask_Unset) | Mask_Set);
+	uint32_t Value;
+	sideband_Read(Dest, Register, &Value);
+	sideband_Write(Dest, Register, (Value & ~Mask_Unset) | Mask_Set);
 }

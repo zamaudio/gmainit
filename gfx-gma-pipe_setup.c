@@ -40,17 +40,17 @@
 #define VGA_CONTROL_BLINK_DUTY_CYCLE_50		(2 << 6)
 #define VGA_CONTROL_VSYNC_BLINK_RATE_MASK	(0x3f << 0)
 
-const Word32 DSPCNTR_MASK =
+const uint32_t DSPCNTR_MASK =
 		DSPCNTR_ENABLE |
 		DSPCNTR_GAMMA_CORRECTION |
 		DSPCNTR_FORMAT_MASK |
 		DSPCNTR_DISABLE_TRICKLE_FEED;
 
-typedef Pos32 VGA_Cycle_Count;
+typedef uint32_t VGA_Cycle_Count;
 
-Word32 VGA_CONTROL_VSYNC_BLINK_RATE(VGA_Cycle_Count Cycles)
+uint32_t VGA_CONTROL_VSYNC_BLINK_RATE(VGA_Cycle_Count Cycles)
 {
-	return Word32(Cycles) / 2 - 1;
+	return (uint32_t)(Cycles) / 2 - 1;
 }
 
 #define PF_CTRL_ENABLE				(1 << 31)
@@ -60,19 +60,19 @@ Word32 VGA_CONTROL_VSYNC_BLINK_RATE(VGA_Cycle_Count Cycles)
 #define PS_CTRL_SCALER_MODE_7X5_EXTENDED	(1 << 28)
 #define PS_CTRL_FILTER_SELECT_MEDIUM_2		(1 << 23)
 
-Word32 PLANE_WM_LINES(Natural Lines)
+uint32_t PLANE_WM_LINES(uint32_t Lines)
 {
-	return (Word32(Lines) << PLANE_WM_LINES_SHIFT) & PLANE_WM_LINES_MASK;
+	return ((uint32_t)(Lines) << PLANE_WM_LINES_SHIFT) & PLANE_WM_LINES_MASK;
 }
 
-Word32 PLANE_WM_BLOCKS(Natural Blocks)
+uint32_t PLANE_WM_BLOCKS(uint32_t Blocks)
 {
-	return Word32(Blocks) & PLANE_WM_BLOCKS_MASK;
+	return (uint32_t)(Blocks) & PLANE_WM_BLOCKS_MASK;
 }
 
-Word32 Encode(Pos16 LSW, Pos16 MSW)
+uint32_t Encode(uint16_t LSW, uint16_t MSW)
 {
-	return ((Word32(MSW) - 1) << 16) | (Word32(LSW) - 1);
+	return (((uint32_t)(MSW) - 1) << 16) | ((uint32_t)(LSW) - 1);
 }
 
 void Clear_Watermarks(Controller_Type Controller)
@@ -88,7 +88,7 @@ void Clear_Watermarks(Controller_Type Controller)
 
 void Setup_Watermarks(Controller_Type Controller)
 {
-	typedef Word32 Per_Plane_Buffer_Range[3];
+	typedef uint32_t Per_Plane_Buffer_Range[3];
 	const Per_Plane_Buffer_Range Buffer_Range = {
 		(159 << 16) | 0,
 		(319 << 16) | 160,
@@ -105,12 +105,12 @@ void Setup_Watermarks(Controller_Type Controller)
 void Setup_Hires_Plane(Controller_Type Controller, Framebuffer_Type Framebuffer)
 {
 	//  FIXME: setup correct format, based on framebuffer RGB format
-	const Word32 Format = 6 << 26;
-	Word32 PRI = DSPCNTR_ENABLE | Format;
+	const uint32_t Format = 6 << 26;
+	uint32_t PRI = DSPCNTR_ENABLE | Format;
 	
-	Word32 To_Bytes(Width_Type Pixels)
+	uint32_t To_Bytes(Width_Type Pixels)
 	{
-		return Word32(Pos64(Pixels) * 4 * Framebuffer.BPC / 8);
+		return (uint32_t)((uint64_t)(Pixels) * 4 * Framebuffer.BPC / 8);
 	}
 	
 	if(Config.Has_Plane_Control) {
@@ -120,7 +120,7 @@ void Setup_Hires_Plane(Controller_Type Controller, Framebuffer_Type Framebuffer)
 				PLANE_CTL_PLANE_GAMMA_DISABLE);
 		Registers.Write(Controller.PLANE_OFFSET, 0);
 		Registers.Write(Controller.PLANE_SIZE,
-			Encode(Pos16(Framebuffer.Width), Pos16(Framebuffer.Height)));
+			Encode((uint16_t)(Framebuffer.Width), (uint16_t)(Framebuffer.Height)));
 		Registers.Write(Controller.PLANE_STRIDE,
 			To_Bytes(Framebuffer.Stride) / 64);
 		Registers.Write(Controller.PLANE_POS, 0);
@@ -141,9 +141,9 @@ void Setup_Hires_Plane(Controller_Type Controller, Framebuffer_Type Framebuffer)
 	}
 }
 
-void Setup_Display(Controller_Type Controller, Framebuffer_Type Framebuffer, BPC_Type Dither_BPC, Boolean Dither)
+void Setup_Display(Controller_Type Controller, Framebuffer_Type Framebuffer, BPC_Type Dither_BPC, bool Dither)
 {
-	Word8 Reg8;
+	uint8_t Reg8;
 
 	if(Config.Has_Plane_Control) {
 		Setup_Watermarks(Controller);
@@ -171,7 +171,7 @@ void Setup_Display(Controller_Type Controller, Framebuffer_Type Framebuffer, BPC
 		Setup_Hires_Plane(Controller, Framebuffer);
 	}
 	Registers.Write(Controller.PIPESRC,
-			Encode(Pos16(Framebuffer.Height), Pos16(Framebuffer.Width)));
+			Encode((uint16_t)(Framebuffer.Height), (uint16_t)(Framebuffer.Width)));
 	if(Config.Has_Pipeconf_Misc) {
 		Registers.Write(Controller.PIPEMISC,
 				Transcoder.BPC_Conf(Dither_BPC, Dither)
@@ -179,7 +179,7 @@ void Setup_Display(Controller_Type Controller, Framebuffer_Type Framebuffer, BPC
 	}
 }
 
-void Scale_Keep_Aspect(Pos32 *Width, Pos32 *Height, Pos32 Max_Width, Pos32 Max_Height, Framebuffer_Type Framebuffer)
+void Scale_Keep_Aspect(uint32_t *Width, uint32_t *Height, uint32_t Max_Width, uint32_t Max_Height, Framebuffer_Type Framebuffer)
 {
 	if((Max_Width * Framebuffer.Height) / Framebuffer.Width <= Max_Height) {
 		*Width = Max_Width;
@@ -193,29 +193,29 @@ void Scale_Keep_Aspect(Pos32 *Width, Pos32 *Height, Pos32 Max_Width, Pos32 Max_H
 void Setup_Skylake_Pipe_Scaler(Controller_Type Controller, Mode_Type Mode, Framebuffer_Type Framebuffer)
 {
 	//  Enable 7x5 extended mode where possible:
-	const Word32 Scaler_Mode = PS_CTRL_SCALER_MODE_7X5_EXTENDED;
+	const uint32_t Scaler_Mode = PS_CTRL_SCALER_MODE_7X5_EXTENDED;
 	//  We can scale up to 2.99x horizontally:
-	const Pos32 Horizontal_Limit = ((Framebuffer.Width * 299) / 100);
+	const uint32_t Horizontal_Limit = ((Framebuffer.Width * 299) / 100);
 	//  The third scaler is limited to 1.99x
 	//  vertical scaling for source widths > 2048:
-	const Pos32 Vertical_Limit = (Framebuffer.Height * 299) / 100;
-	Pos32 Width, Height;
+	const uint32_t Vertical_Limit = (Framebuffer.Height * 299) / 100;
+	uint32_t Width, Height;
 	//  Writes to WIN_SZ arm the PS registers.
 	Scale_Keep_Aspect(&Width, &Height,
-			min(Horizontal_Limit, Pos32(Mode.H_Visible)),
-			min(Vertical_Limit, Pos32(Mode.V_Visible)),
+			min(Horizontal_Limit, (uint32_t)(Mode.H_Visible)),
+			min(Vertical_Limit, (uint32_t)(Mode.V_Visible)),
 			Framebuffer);
 	Registers.Write(Controller.PS_CTRL_1, PS_CTRL_ENABLE_SCALER | Scaler_Mode);
 	Registers.Write(Controller.PS_WIN_POS_1,
-			((Word32(Pos32(Mode.H_Visible) - Width) / 2) << 16) |
-			Word32(Pos32(Mode.V_Visible) - Height) / 2);
-	Registers.Write(Controller.PS_WIN_SZ_1, (Word32(Width) << 16) | Word32(Height));
+			(((uint32_t)((uint32_t)(Mode.H_Visible) - Width) / 2) << 16) |
+			(uint32_t)((uint32_t)(Mode.V_Visible) - Height) / 2);
+	Registers.Write(Controller.PS_WIN_SZ_1, ((uint32_t)(Width) << 16) | (uint32_t)(Height));
 }
 
 void Setup_Ironlake_Panel_Fitter(Controller_Type Controller, Mode_Type Mode, Framebuffer_Type Framebuffer)
 {
 	//  Force 1:1 mapping of panel fitter:pipe
-	Word32 PF_Ctrl_Pipe_Sel = 0;
+	uint32_t PF_Ctrl_Pipe_Sel = 0;
 	if (Config.Has_PF_Pipe_Select) {
 		switch (Controller.PF_CTRL) {
 		case Registers.PFA_CTL_1:
@@ -233,22 +233,22 @@ void Setup_Ironlake_Panel_Fitter(Controller_Type Controller, Mode_Type Mode, Fra
 		}
 	}
 
-	Pos32 Width, Height;
+	uint32_t Width, Height;
 	//  Writes to WIN_SZ arm the PF registers.
-	Scale_Keep_Aspect(&Width, &Height, Pos32(Mode.H_Visible), Pos32(Mode.V_Visible), Framebuffer);
+	Scale_Keep_Aspect(&Width, &Height, (uint32_t)(Mode.H_Visible), (uint32_t)(Mode.V_Visible), Framebuffer);
 	Registers.Write(Controller.PF_CTRL,
 			PF_CTRL_ENABLE |
 			PF_Ctrl_Pipe_Sel |
 			PF_CTRL_FILTER_MED);
 	Registers.Write(Controller.PF_WIN_POS,
-			((Word32(Pos32(Mode.H_Visible) - Width) / 2) << 16) |
-			Word32(Pos32(Mode.V_Visible) - Height) / 2);
-	Registers.Write(Controller.PF_WIN_SZ, (Word32(Width) << 16) | Word32(Height));
+			(((uint32_t)((uint32_t)(Mode.H_Visible) - Width) / 2) << 16) |
+			(uint32_t)((uint32_t)(Mode.V_Visible) - Height) / 2);
+	Registers.Write(Controller.PF_WIN_SZ, ((uint32_t)(Width) << 16) | (uint32_t)(Height));
 }
 
 void Setup_Scaling(Controller_Type Controller, HW.GFX::Mode_Type Mode, HW.GFX::Framebuffer_Type Framebuffer)
 {
-	if((Framebuffer.Width != Pos32(Mode.H_Visible)) || (Framebuffer.Height != Pos32(Mode.V_Visible))) {
+	if((Framebuffer.Width != (uint32_t)(Mode.H_Visible)) || (Framebuffer.Height != (uint32_t)(Mode.V_Visible))) {
 		if(Config.Has_Plane_Control) {
 			Setup_Skylake_Pipe_Scaler(Controller, Mode, Framebuffer);
 		} else {
@@ -261,7 +261,7 @@ void On(Pipe_Index Pipe, Port_Config Port_Cfg, Framebuffer_Type Framebuffer)
 {
 	//  Enable dithering if framebuffer BPC differs from port BPC,
 	//  as smooth gradients look really bad without.
-	const Boolean Dither = (Framebuffer.BPC != Port_Cfg.Mode.BPC);
+	const bool Dither = (Framebuffer.BPC != Port_Cfg.Mode.BPC);
 
 	Transcoder.Setup(Pipe, Port_Cfg);
 	Setup_Display(Controllers[Pipe], Framebuffer, Port_Cfg.Mode.BPC, Dither);
@@ -288,8 +288,8 @@ void Panel_Fitter_Off(Controller_Type Controller)
 	{
 		Registers.Unset_Mask(Controller.PS_CTRL_1, PS_CTRL_ENABLE_SCALER);
 		Registers.Write(Controller.PS_WIN_SZ_1, 0);
-		if((Controller.PS_CTRL_2 != Registers.Invalid_Register) &&
-				(Controller.PS_WIN_SZ_2 != Registers.Invalid_Register)) {
+		if((Controller.PS_CTRL_2 != Registers.INVALID_REGISTER) &&
+				(Controller.PS_WIN_SZ_2 != Registers.INVALID_REGISTER)) {
 			Registers.Unset_Mask(Controller.PS_CTRL_2, PS_CTRL_ENABLE_SCALER);
 			Registers.Write(Controller.PS_WIN_SZ_2, 0);
 		}
@@ -309,7 +309,7 @@ void Off(Pipe_Index Pipe)
 
 void Legacy_VGA_Off( void )
 {
-	Word8 Reg8;
+	uint8_t Reg8;
 
 	Port_IO.OutB(VGA_SR_INDEX, VGA_SR01);
 	Reg8 = Port_IO.InB(VGA_SR_DATA);

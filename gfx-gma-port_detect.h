@@ -16,8 +16,11 @@
 #ifndef GFX_GMA_PORT_DETECT_H
 #define GFX_GMA_PORT_DETECT_H
 
+#include <stdbool.h>
+#include "gfx-gma.h"
+
 void Initialize( void );
-void Hotplug_Detect(Active_Port_Type Port, Boolean *Detected);
+void Hotplug_Detect(Active_Port_Type Port, bool *Detected);
 void Clear_Hotplug_Detect(Active_Port_Type Port);
 
 #endif

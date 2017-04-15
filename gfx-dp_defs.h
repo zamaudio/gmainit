@@ -16,16 +16,18 @@
 #ifndef GFX_DP_DEFS_H
 #define GFX_DP_DEFS_H
 
+#include <inttypes.h>
+
 typedef int Aux_Message_Command;
 typedef int Aux_Message_Address;
-typedef Natural Aux_Payload_Length;
-typedef Natural Aux_Payload_Index;
+typedef uint32_t Aux_Payload_Length;
+typedef uint32_t Aux_Payload_Index;
 typedef Aux_Payload_Index Aux_Payload[];
-typedef Natural Aux_Request_Length;
-typedef Natural Aux_Request_Index;
+typedef uint32_t Aux_Request_Length;
+typedef uint32_t Aux_Request_Index;
 typedef Aux_Request_Index Aux_Request[];
-typedef Natural Aux_Response_Length;
-typedef Natural Aux_Response_Index;
+typedef uint32_t Aux_Response_Length;
+typedef uint32_t Aux_Response_Index;
 typedef Aux_Response_Index Aux_Response[];
 
 #endif

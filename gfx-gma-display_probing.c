@@ -13,17 +13,17 @@
  * GNU General Public License for more details.
  */
 
+#include "gfx-edid.h"
 #include "gfx-i2c.h"
-#include "gfx-gma-config_helpers.h"
 #include "gfx-gma-i2c.h"
 #include "gfx-gma-panel.h"
 #include "gfx-gma-display_probing.h"
 
-Boolean Port_Configured(Pipe_Configs Configs, Port_Type Port)
+bool Port_Configured(Pipe_Configs *Configs, Port_Type Port)
 {
-	return (Configs[Primary].Port == Port) ||
-		(Configs[Secondary].Port == Port) ||
-		(Configs[Tertiary].Port == Port);
+	return (Configs[Primary]->Port == Port) ||
+		(Configs[Secondary]->Port == Port) ||
+		(Configs[Tertiary]->Port == Port);
 }
 
 //  DP and HDMI share physical pins.
@@ -47,95 +47,96 @@ Port_Type Sibling_Port(Port_Type Port)
 	}
 }
 
-Boolean Has_Sibling_Port(Port_Type Port)
+bool Has_Sibling_Port(Port_Type Port)
 {
 	return (Sibling_Port(Port) != Disabled);
 }
 
-Boolean Read_EDID(EDID.Raw_EDID_Data *Raw_EDID, Active_Port_Type Port)
+bool Read_EDID(uint8_t Raw_EDID[], Active_Port_Type Port)
 {
-	Boolean Success = False;
-	Byte Raw_EDID_Length = 128;
+	bool Success = false;
+	uint8_t Raw_EDID_Length = 128;
 
 	for( int I = 1 ; I <= 2 ; I++) {
-		if(Config_Helpers.To_Display_Type(Port) == DP) {
+		if(confighelpers_To_Display_Type(Port) == DP) {
 			//  May need power to read edid
 			Pipe_Configs Temp_Configs = Cur_Configs;
-			Temp_Configs(Primary).Port = Port;
-			Power_And_Clocks.Power_Up(Cur_Configs, Temp_Configs);
-			const GMA.DP_Port DP_Port = DP_A;
-			Success = DP_Aux_Ch.I2C_Read(DP_Port, 0x50, Raw_EDID_Length, Raw_EDID);
+			Temp_Configs[Primary].Port = Port;
+			powerandclocks_Power_Up(Cur_Configs, Temp_Configs);
+			const DP_Port DP_Port = DP_A;
+			Success = dpauxch_I2C_Read(DP_Port, 0x50, Raw_EDID_Length, Raw_EDID);
 		} else {
+			uint32_t Prt;
 			if(Port == Analog) {
-				Prt = Config.Analog_I2C_Port;
+				Prt = CONFIG_Analog_I2C_Port;
 			} else {
-				Prt = Config_Helpers.To_PCH_Port(Port);
+				Prt = confighelpers_To_PCH_Port(Port);
 			}
-			Success = I2C.I2C_Read(Prt, 0x50, Raw_EDID_Length, Raw_EDID);
+			Success = i2c_I2C_Read(Prt, 0x50, Raw_EDID_Length, Raw_EDID);
 		}
 		//  don't retry if reading itself failed
-		break;
+		if(!Success)
+			break;
 
-		Success = EDID.Sanitize(Raw_EDID);
-		break;
+		Success = edid_Sanitize(Raw_EDID);
+		if(Success)
+			break;
 	}
 	return Success;
 }
 
-Boolean Probe_Port(Pipe_Config *Pipe_Cfg, Active_Port_Type Port)
+bool Probe_Port(Pipe_Config *Pipe_Cfg, Active_Port_Type Port)
 {
-	Boolean Success;
-	Byte Raw_EDID[128] = { 0 };
+	bool Success;
+	uint8_t Raw_EDID[128] = { 0 };
 	
-	Success = Config.Valid_Port(Port);
+	Success = CONFIG_Valid_Port(Port);
 	if(Success) {
 		if(Port == Internal) {
-			Panel.Wait_On();
+			panel_Wait_On();
 		}
 		Success = Read_EDID(Raw_EDID, Port);
 	}
-	if(Success && (Compatible_Display(Raw_EDID, Config_Helpers.To_Display_Type(Port)) && Has_Preferred_Mode(Raw_EDID))) {
-		Pipe_Cfg.Port = Port;
-		Pipe_Cfg.Mode = EDID.Preferred_Mode(Raw_EDID);
+	if(Success && (edid_Compatible_Display(Raw_EDID, confighelpers_To_Display_Type(Port)) && edid_Has_Preferred_Mode(Raw_EDID))) {
+		Pipe_Cfg->Port = Port;
+		Pipe_Cfg->Mode = edid_Preferred_Mode(Raw_EDID);
 		if(Has_Sibling_Port(Port)) {
 			// Probe sibling port too and bail out if something is detected.
 			// This is a precaution for adapters that expose the pins of a
 			// port for both HDMI/DVI and DP (like some ThinkPad docks). A
 			// user might have attached both by accident and there are ru-
 			// mors of displays that got fried by applying the wrong signal.
-			Boolean Have_Sibling_EDID;
-			Read_EDID(Raw_EDID, Sibling_Port(Port), Have_Sibling_EDID);
-			if(Have_Sibling_EDID)
-			{
-				Pipe_Cfg.Port = Disabled;
-				Success = False;
+			bool Have_Sibling_EDID = Read_EDID(Raw_EDID, Sibling_Port(Port));
+			if(Have_Sibling_EDID) {
+				Pipe_Cfg->Port = Disabled;
+				Success = false;
 			}
 		}
 	} else {
-		Success = False;
+		Success = false;
 	}
 	return Success;
 }
 
-void Scan_Ports(Pipe_Configs *Configs, Port_List Ports, Pipe_Index Max_Pipe, Boolean Keep_Power)
+void Scan_Ports(Pipe_Configs *Configs, Port_List Ports, Pipe_Index Max_Pipe, bool Keep_Power)
 {
-	Boolean Probe_Internal = False;
+	bool Probe_Internal = false;
 	Port_List_Range Port_Idx = 0;
-	Boolean Success;
-	Configs[0].Port = Disabled;
-	Configs[0].Mode = Invalid_Mode;
-	Configs[0].Framebuffer = Default_FB;
-	Configs[1].Port = Disabled;
-	Configs[1].Mode = Invalid_Mode;
-	Configs[1].Framebuffer = Default_FB;
-	Configs[2].Port = Disabled;
-	Configs[2].Mode = Invalid_Mode;
-	Configs[2].Framebuffer = Default_FB;
+	bool Success;
+	Configs[0]->Port = Disabled;
+	Configs[0]->Mode = Invalid_Mode;
+	Configs[0]->Framebuffer = Default_FB;
+	Configs[1]->Port = Disabled;
+	Configs[1]->Mode = Invalid_Mode;
+	Configs[1]->Framebuffer = Default_FB;
+	Configs[2]->Port = Disabled;
+	Configs[2]->Mode = Invalid_Mode;
+	Configs[2]->Framebuffer = Default_FB;
 	//  Turn panel on early to probe other ports during the power on delay.
 	for( int Idx = 0; Idx < 8 ; Idx++) {
 		if(Ports[Idx] == Internal) {
-			Panel.On(False);
-			Probe_Internal = True;
+			panel_On(false);
+			Probe_Internal = true;
 			break;
 		}
 	}
@@ -143,9 +144,9 @@ void Scan_Ports(Pipe_Configs *Configs, Port_List Ports, Pipe_Index Max_Pipe, Boo
 	for( int Pipe = 0; Pipe < 3; Pipe++) {
 		while( Ports[Port_Idx]!=Disabled) {
 			if(!Port_Configured(Configs, Ports[Port_Idx]) && (!Has_Sibling_Port(Ports[Port_Idx]) || !Port_Configured(Configs, Sibling_Port(Ports[Port_Idx])))) {
-				Success = Probe_Port(Configs(Pipe), Ports[Port_Idx]);
+				Success = Probe_Port(Configs[Pipe], Ports[Port_Idx]);
 			} else {
-				Success = False;
+				Success = false;
 			}
 			Port_Idx++;
 			break;
@@ -154,10 +155,10 @@ void Scan_Ports(Pipe_Configs *Configs, Port_List Ports, Pipe_Index Max_Pipe, Boo
 
 	//  Restore power settings
 	if(!Keep_Power) {
-		Power_And_Clocks.Power_Set_To(Cur_Configs);
+		powerandclocks_Power_Set_To(Cur_Configs);
 	}
 	//  Turn panel power off if probing failed.
 	if(Probe_Internal && !Port_Configured(Configs, Internal)) {
-		Panel.Off();
+		panel_Off();
 	}
 }

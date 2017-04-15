@@ -13,12 +13,28 @@
  * GNU General Public License for more details.
  */
 
+#ifndef GFX_EDID_H
+#define GFX_EDID_H
+
+#include <inttypes.h>
 #include <stdbool.h>
+#include <string.h> // memcpy
 
-bool TPS3_Supported;
+#include "gfx.h"
 
-/*
-  with function To_Aux(Port: T) return Aux_T;
-  with function Max_V_Swing(Port: T) return DP_Info.DP_Voltage_Swing;
-  with function Max_Pre_Emph(Port: T; Train_Set: DP_Info.Train_Set) return DP_Info.DP_Pre_Emph;
-*/
+#define REVISION			19
+#define INPUT				20
+#define DESCRIPTOR_1			54
+#define INPUT_DIGITAL			(1 << 7)
+#define INPUT_DIGITAL_DEPTH_SHIFT	4
+#define INPUT_DIGITAL_DEPTH_MASK	(7 << 4)
+#define INPUT_DIGITAL_DEPTH_UNDEF	(0 << 4)
+#define INPUT_DIGITAL_DEPTH_RESERVED	(7 << 4)
+
+bool edid_Checksum_Valid(uint8_t Raw_EDID[]);
+bool edid_Sanitize(uint8_t Raw_EDID[]);
+bool edid_Compatible_Display(uint8_t Raw_EDID[], Display_Type Display);
+bool edid_Has_Preferred_Mode(uint8_t Raw_EDID[]);
+Mode_Type edid_Preferred_Mode(uint8_t Raw_EDID[]);
+
+#endif

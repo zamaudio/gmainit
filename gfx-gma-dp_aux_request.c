@@ -33,82 +33,80 @@
 #define DP_AUX_CTL_2X_BIT_CLOCK_DIV_MASK	0x7ff
 
 // TODO: HSW/BDW with LPT-H might need a workaround for the 2x bit clock.
-typedef Natural DP_AUX_CTL_MESSAGE_SIZE_T;
+typedef uint32_t DP_AUX_CTL_MESSAGE_SIZE_T;
 
-Word32 DP_AUX_CTL_MESSAGE_SIZE(DP_AUX_CTL_MESSAGE_SIZE_T Message_Length);
+uint32_t DP_AUX_CTL_MESSAGE_SIZE(DP_AUX_CTL_MESSAGE_SIZE_T Message_Length);
 
 #define DDI_AUX_MUTEX_MUTEX_ENABLE		(1 << 31)
 #define DDI_AUX_MUTEX_MUTEX_STATUS		(1 << 30)
 
-typedef Positive AUX_CH_Data_Regs;
-typedef Registers.Registers_Index AUX_CH_Data_Regs_Array[/* AUX_CH_Data_Regs */];
-typedef struct t_AUX_CH_Registers
-{
-	Registers.Registers_Index CTL;
+typedef uint32_t AUX_CH_Data_Regs_Array[5];
+typedef struct t_AUX_CH_Registers {
+	uint32_t CTL;
 	AUX_CH_Data_Regs_Array DATA;
-	Registers.Registers_Invalid_Index MUTEX;
+	uint32_t MUTEX;
 } AUX_CH_Registers;
 
 typedef AUX_CH_Registers AUX_CH_Registers_Array[4];
 
 const AUX_CH_Registers_Array AUX_CH = {
 	{
-		Registers.DP_AUX_CTL_A,
+		DP_AUX_CTL_A,
 		{
-			Registers.DP_AUX_DATA_A_1,
-			Registers.DP_AUX_DATA_A_2,
-			Registers.DP_AUX_DATA_A_3,
-			Registers.DP_AUX_DATA_A_4,
-			Registers.DP_AUX_DATA_A_5
+			DP_AUX_DATA_A_1,
+			DP_AUX_DATA_A_2,
+			DP_AUX_DATA_A_3,
+			DP_AUX_DATA_A_4,
+			DP_AUX_DATA_A_5
 		},
-		Registers.Invalid_Register
+		INVALID_REGISTER
 	},
 	{
-		Registers.DP_AUX_CTL_B,
+		PCH_DP_AUX_CTL_B,
 		{
-			Registers.DP_AUX_DATA_B_1,
-			Registers.DP_AUX_DATA_B_2,
-			Registers.DP_AUX_DATA_B_3,
-			Registers.DP_AUX_DATA_B_4,
-			Registers.DP_AUX_DATA_B_5
+			PCH_DP_AUX_DATA_B_1,
+			PCH_DP_AUX_DATA_B_2,
+			PCH_DP_AUX_DATA_B_3,
+			PCH_DP_AUX_DATA_B_4,
+			PCH_DP_AUX_DATA_B_5
 		},
-		Registers.Invalid_Register
+		INVALID_REGISTER
 	},
 	{
-		Registers.DP_AUX_CTL_C,
+		PCH_DP_AUX_CTL_C,
 		{
-			Registers.DP_AUX_DATA_C_1,
-			Registers.DP_AUX_DATA_C_2,
-			Registers.DP_AUX_DATA_C_3,
-			Registers.DP_AUX_DATA_C_4,
-			Registers.DP_AUX_DATA_C_5
+			PCH_DP_AUX_DATA_C_1,
+			PCH_DP_AUX_DATA_C_2,
+			PCH_DP_AUX_DATA_C_3,
+			PCH_DP_AUX_DATA_C_4,
+			PCH_DP_AUX_DATA_C_5
 		},
-		Registers.Invalid_Register
+		INVALID_REGISTER
 	},
 	{
-		Registers.DP_AUX_CTL_D,
+		PCH_DP_AUX_CTL_D,
 		{
-			Registers.DP_AUX_DATA_D_1,
-			Registers.DP_AUX_DATA_D_2,
-			Registers.DP_AUX_DATA_D_3,
-			Registers.DP_AUX_DATA_D_4,
-			Registers.DP_AUX_DATA_D_5
+			PCH_DP_AUX_DATA_D_1,
+			PCH_DP_AUX_DATA_D_2,
+			PCH_DP_AUX_DATA_D_3,
+			PCH_DP_AUX_DATA_D_4,
+			PCH_DP_AUX_DATA_D_5
 		},
-		Registers.Invalid_Register
+		INVALID_REGISTER
 	}
 };
 
-Word32 DP_AUX_CTL_MESSAGE_SIZE(DP_AUX_CTL_MESSAGE_SIZE_T Message_Length)
+uint32_t DP_AUX_CTL_MESSAGE_SIZE(DP_AUX_CTL_MESSAGE_SIZE_T Message_Length)
 {
-	return Word32(Message_Length) * DP_AUX_CTL_MESSAGE_SIZE_SHIFT;
+	return (uint32_t)(Message_Length) * DP_AUX_CTL_MESSAGE_SIZE_SHIFT;
 }
 
-Boolean Aux_Request_Low(DP_Port Port, DP_Defs.Aux_Request Request, DP_Defs.Aux_Request_Length Request_Length, DP_Defs.Aux_Response *Response, DP_Defs.Aux_Response_Length *Response_Length)
+bool Aux_Request_Low(DP_Port Port, Aux_Request Request, Aux_Request_Length Request_Length, Aux_Response *Response, Aux_Response_Length *Response_Length)
 {
-	void Write_Data_Reg(Registers.Registers_Index Register, DP_Defs.Aux_Request Buf, DP_Defs.Aux_Request_Length Length, DP_Defs.Aux_Request_Index Offset)
+	void Write_Data_Reg(uint32_t Register, Aux_Request Buf, Aux_Request_Length Length, Aux_Request_Index Offset)
 	{
-		Word32 Value;
-		Natural Count;
+		uint32_t Value;
+		uint32_t Count;
 		if(Offset < Length) {
 			if(Length - Offset > 4) {
 				Count = 4;
@@ -117,16 +115,16 @@ Boolean Aux_Request_Low(DP_Port Port, DP_Defs.Aux_Request Request, DP_Defs.Aux_R
 			}
 			Value = 0;
 			for( int Idx = 0; Idx < Count; Idx++) {
-				Value = Value | (Word32(Buf[Offset + Idx]) << ((3 - Idx) * 8));
+				Value = Value | ((uint32_t)(Buf[Offset + Idx]) << ((3 - Idx) * 8));
 			}
 			Registers.Write(Register, Value);
 		}
 	}
 
-	void Read_Data_Reg(Registers.Registers_Index Register, DP_Defs.Aux_Response *Buf, DP_Defs.Aux_Response_Length Length, DP_Defs.Aux_Response_Index Offset)
+	void Read_Data_Reg(uint32_t Register, Aux_Response *Buf, Aux_Response_Length Length, Aux_Response_Index Offset)
 	{
-		Word32 Value;
-		DP_Defs.Aux_Response_Length Count;
+		uint32_t Value;
+		Aux_Response_Length Count;
 		if(Offset < Length)
 		{
 			if(Length - Offset > 4) {
@@ -137,30 +135,31 @@ Boolean Aux_Request_Low(DP_Port Port, DP_Defs.Aux_Request Request, DP_Defs.Aux_R
 			Registers.Read(Register, Value);
 			for( int Idx = 0; Idx < Count; Idx++)
 			{
-				Buf[Offset + Idx] = Word8((Value >> ((3 - Idx) * 8)) & 0xff);
+				(*Buf)[Offset + Idx] = (uint8_t)((Value >> ((3 - Idx) * 8)) & 0xff);
 			}
 		}
 	}
 
-	Word32 DP_AUX_CTL_2x_Clock_Mask = DP_AUX_CTL_2X_BIT_CLOCK_DIV_MASK;
-	const Word32 DP_AUX_CTL_2x_Clock = Word32((Config.Default_RawClk_Freq + 1000000) / 2000000);
-	Boolean Busy;
-	Word32 Status;
+	uint32_t DP_AUX_CTL_2x_Clock_Mask = DP_AUX_CTL_2X_BIT_CLOCK_DIV_MASK;
+	const uint32_t DP_AUX_CTL_2x_Clock = (uint32_t)((CONFIG_Default_RawClk_Freq + 1000000) / 2000000);
+	bool Busy;
+	uint32_t Status;
+	bool Success = false;
 	//  Don't care
-	*Response = 0;
-	*Response_Length = DP_Defs.Aux_Response_Length[0];
-	if(Config.Need_DP_Aux_Mutex) {
+	(*Response)[0] = 0;
+	*Response_Length = 0;
+	if(CONFIG_Need_DP_Aux_Mutex) {
 		Registers.Set_Mask(AUX_CH[Port].MUTEX, DDI_AUX_MUTEX_MUTEX_ENABLE);
 		Registers.Wait_Set_Mask(AUX_CH[Port].MUTEX, DDI_AUX_MUTEX_MUTEX_STATUS);
 	}
 	Registers.Is_Set_Mask(AUX_CH[Port].CTL, DP_AUX_CTL_SEND_BUSY, &Busy);
 	if(Busy) {
-		Success = False;
+		Success = false;
 	} else {
 		for( int Idx = 0; Idx < 5; Idx++)
 		{
-			Write_Data_Reg(AUX_CH[Port].DATA(Idx), Request, Request_Length,
-					(Natural(Idx) - 1) * 4);
+			Write_Data_Reg(AUX_CH[Port].DATA[Idx], Request, Request_Length,
+					((uint32_t)(Idx) - 1) * 4);
 		}
 
 		Registers.Unset_And_Set_Mask(AUX_CH[Port].CTL,
@@ -180,26 +179,26 @@ Boolean Aux_Request_Low(DP_Port Port, DP_Defs.Aux_Request Request, DP_Defs.Aux_R
 		Success = ((Status & (DP_AUX_CTL_TIME_OUT_ERROR | DP_AUX_CTL_RECEIVE_ERROR)) == 0);
 		if(Success) {
 			Status = (Status & DP_AUX_CTL_MESSAGE_SIZE_MASK) / DP_AUX_CTL_MESSAGE_SIZE_SHIFT;
-			if(Natural(Status) < 0) {
-				Success = False;
+			if((uint32_t)(Status) < 0) {
+				Success = false;
 			} else {
-				if(Natural(Status) > 31) {
-					Response_Length = 31;
+				if((uint32_t)(Status) > 31) {
+					*Response_Length = 31;
 				} else {
-					Response_Length = Natural(Status);
+					*Response_Length = (uint32_t)(Status);
 				}
 			}
 		}
 		if(Success) {
 			for( int Idx = 0; Idx < 5; Idx++)
 			{
-				Read_Data_Reg(AUX_CH[Port].DATA(Idx),
-						Response, Response_Length,
-						(Natural(Idx) - 1) * 4);
+				Read_Data_Reg(AUX_CH[Port].DATA[Idx],
+						Response, *Response_Length,
+						((uint32_t)(Idx) - 1) * 4);
 			}
 		}
 	}
-	if(Config.Need_DP_Aux_Mutex) {
+	if(CONFIG_Need_DP_Aux_Mutex) {
 		Registers.Unset_And_Set_Mask(AUX_CH[Port].MUTEX,
 				DDI_AUX_MUTEX_MUTEX_ENABLE,
 				DDI_AUX_MUTEX_MUTEX_STATUS);
@@ -207,9 +206,9 @@ Boolean Aux_Request_Low(DP_Port Port, DP_Defs.Aux_Request Request, DP_Defs.Aux_R
 }
 
 // --------------------------------------------------------------------------
-Boolean Do_Aux_Request(DP_Port Port, DP_Defs.Aux_Request Request, DP_Defs.Aux_Request_Length Request_Length, DP_Defs.Aux_Response *Response, DP_Defs.Aux_Response_Length *Response_Length)
+bool Do_Aux_Request(DP_Port Port, Aux_Request Request, Aux_Request_Length Request_Length, Aux_Response *Response, Aux_Response_Length *Response_Length)
 {
-	Boolean Success = False;
+	bool Success = false;
 	for( int Try = 1; Try <= 3; Try++) {
 		Success = Aux_Request_Low(Port, Request, Request_Length, Response, Response_Length);
 		if (Success) {

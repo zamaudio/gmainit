@@ -16,8 +16,9 @@
 #ifndef GFX_GMA_DP_AUX_REQUEST_H
 #define GFX_GMA_DP_AUX_REQUEST_H
 
-#include "hw-gfx-dp_defs.h"
+#include <stdbool.h>
+#include "gfx-dp_defs.h"
 
-Boolean Do_Aux_Request(DP_Port Port, DP_Defs.Aux_Request Request, DP_Defs.Aux_Request_Length Request_Length, DP_Defs.Aux_Response *Response, DP_Defs.Aux_Response_Length *Response_Length);
+bool Do_Aux_Request(DP_Port Port, Aux_Request Request, Aux_Request_Length Request_Length, Aux_Response *Response, Aux_Response_Length *Response_Length);
 
 #endif

@@ -23,7 +23,7 @@ typedef enum {
 	Power_Cycle_Delay
 } Delays_Enum;
 
-typedef Natural Panel_Power_Delays[5];
+typedef uint32_t Panel_Power_Delays[5];
 
 const Panel_Power_Delays Default_EDP_Delays_US = {
 	210000,
@@ -46,13 +46,13 @@ Panel_Power_Delays Delays_US;
 //  gure the hardware to zero delays or wait for both the software timeout
 //  and the hardware power sequencer. The latter option would be less error
 //  prone, as the hardware might just don't work as expected.
-Time.T Power_Cycle_Timer;
-Time.T Power_Up_Timer;
+uint32_t Power_Cycle_Timer;
+uint32_t Power_Up_Timer;
 
 // --------------------------------------------------------------------------
-Word32 Div_Round_Up32(Natural Numerator, Natural Denominator)
+uint32_t Div_Round_Up32(uint32_t Numerator, uint32_t Denominator)
 {
-	return (Word32(Numerator) + Word32(Denominator) - 1) / Word32(Denominator);
+	return ((uint32_t)(Numerator) + (uint32_t)(Denominator) - 1) / (uint32_t)(Denominator);
 }
 
 #define PCH_PP_STATUS_ENABLED			(1 << 31)
@@ -76,12 +76,12 @@ Word32 Div_Round_Up32(Natural Numerator, Natural Denominator)
 #define PCH_PP_ON_DELAYS_PWR_UP_MASK		(0x1fff << 16)
 #define PCH_PP_ON_DELAYS_PWR_UP_BL_ON_MASK	(0x1fff << 0)
 
-Word32 PCH_PP_ON_DELAYS_PWR_UP(Natural US)
+uint32_t PCH_PP_ON_DELAYS_PWR_UP(uint32_t US)
 {
 	return (Div_Round_Up32(US, 100) << 16);
 }
 
-Word32 PCH_PP_ON_DELAYS_PWR_UP_BL_ON(Natural US)
+uint32_t PCH_PP_ON_DELAYS_PWR_UP_BL_ON(uint32_t US)
 {
 	return Div_Round_Up32(US, 100);
 }
@@ -89,20 +89,20 @@ Word32 PCH_PP_ON_DELAYS_PWR_UP_BL_ON(Natural US)
 #define PCH_PP_OFF_DELAYS_PWR_DOWN_MASK		(0x1fff << 16)
 #define PCH_PP_OFF_DELAYS_BL_OFF_PWR_DOWN_MASK	(0x1fff << 0)
 
-Word32 PCH_PP_OFF_DELAYS_PWR_DOWN(Natural US)
+uint32_t PCH_PP_OFF_DELAYS_PWR_DOWN(uint32_t US)
 {
 	return (Div_Round_Up32(US, 100) << 16);
 }
 
-Word32 PCH_PP_OFF_DELAYS_BL_OFF_PWR_DOWN(Natural US)
+uint32_t PCH_PP_OFF_DELAYS_BL_OFF_PWR_DOWN(uint32_t US)
 {
 	return Div_Round_Up32(US, 100);
 }
 
-  PCH_PP_DIVISOR_REF_DIVIDER_MASK	ffffff  << 8;
-  PCH_PP_DIVISOR_PWR_CYC_DELAY_MASK	00001f  << 0;
+#define PCH_PP_DIVISOR_REF_DIVIDER_MASK		(0xffffff << 8);
+#define PCH_PP_DIVISOR_PWR_CYC_DELAY_MASK	(0x1f << 0)
 
-Word32 PCH_PP_DIVISOR_PWR_CYC_DELAY(Natural US)
+uint32_t PCH_PP_DIVISOR_PWR_CYC_DELAY(uint32_t US)
 {
 	return Div_Round_Up32(US, 100000) + 1;
 }
@@ -131,41 +131,41 @@ void Static_Init( void )
 	Delays_US = Default_EDP_Delays_US;
 }
 
-void Check_PP_Delays(Panel_Power_Delays *Delays, Boolean *Override)
+void Check_PP_Delays(Panel_Power_Delays *Delays, bool *Override)
 {
 	for( int D = 0; D < 5; D++) {
 		if(Delays[D] == 0) {
 			Delays[D] = Default_EDP_Delays_US[D];
-			*Override = True;
+			*Override = true;
 		}
 	}
 }
 
-void Setup_PP_Sequencer(Boolean Default_Delays)
+void Setup_PP_Sequencer(bool Default_Delays)
 {
-	Word32 Power_Delay, Port_Select;
-	Boolean Override_Delays = False;
+	uint32_t Power_Delay, Port_Select;
+	bool Override_Delays = false;
 
 	Static_Init();
 	if(Default_Delays) {
-		Override_Delays = True;
+		Override_Delays = true;
 	} else {
-		Registers.Read(Registers.PCH_PP_ON_DELAYS, &Power_Delay);
-		Delays_US[Power_Up_Delay] = 100 * Natural(((Power_Delay & PCH_PP_ON_DELAYS_PWR_UP_MASK) >> 16));
-		Delays_US[Power_Up_To_BL_On] = 100 * Natural(Power_Delay & PCH_PP_ON_DELAYS_PWR_UP_BL_ON_MASK);
-		Registers.Read(Registers.PCH_PP_OFF_DELAYS, &Power_Delay);
-		Delays_US[Power_Down_Delay] = 100 * Natural(((Power_Delay & PCH_PP_OFF_DELAYS_PWR_DOWN_MASK) >> 16));
-		Delays_US[BL_Off_To_Power_Down] = 100 * Natural(Power_Delay & PCH_PP_OFF_DELAYS_BL_OFF_PWR_DOWN_MASK);
-		Registers.Read(Registers.PCH_PP_DIVISOR, &Power_Delay);
+		Registers.Read(PCH_PP_ON_DELAYS, &Power_Delay);
+		Delays_US[Power_Up_Delay] = 100 * (uint32_t)(((Power_Delay & PCH_PP_ON_DELAYS_PWR_UP_MASK) >> 16));
+		Delays_US[Power_Up_To_BL_On] = 100 * (uint32_t)(Power_Delay & PCH_PP_ON_DELAYS_PWR_UP_BL_ON_MASK);
+		Registers.Read(PCH_PP_OFF_DELAYS, &Power_Delay);
+		Delays_US[Power_Down_Delay] = 100 * (uint32_t)(((Power_Delay & PCH_PP_OFF_DELAYS_PWR_DOWN_MASK) >> 16));
+		Delays_US[BL_Off_To_Power_Down] = 100 * (uint32_t)(Power_Delay & PCH_PP_OFF_DELAYS_BL_OFF_PWR_DOWN_MASK);
+		Registers.Read(PCH_PP_DIVISOR, &Power_Delay);
 		if((Power_Delay & PCH_PP_DIVISOR_PWR_CYC_DELAY_MASK) > 1)
 		{
-			Delays_US[Power_Cycle_Delay] = 100000 * (Natural(Power_Delay && PCH_PP_DIVISOR_PWR_CYC_DELAY_MASK) - 1);
+			Delays_US[Power_Cycle_Delay] = 100000 * ((uint32_t)(Power_Delay && PCH_PP_DIVISOR_PWR_CYC_DELAY_MASK) - 1);
 		}
-		Check_PP_Delays(Delays_US, Override_Delays);
+		Check_PP_Delays(&Delays_US, &Override_Delays);
 	}
 	if(Override_Delays) {
-		if(Config.Has_PP_Port_Select) {
-			if(Config.Internal_Is_EDP) {
+		if(CONFIG_Has_PP_Port_Select) {
+			if(CONFIG_Internal_Is_EDP) {
 				Port_Select = PCH_PP_ON_DELAYS_PORT_SELECT_DP_A;
 			} else {
 				Port_Select = PCH_PP_ON_DELAYS_PORT_SELECT_LVDS;
@@ -175,7 +175,7 @@ void Setup_PP_Sequencer(Boolean Default_Delays)
 		}
 
 		//  Force power-up to backlight-on delay to 100us as recommended by PRM.
-		Registers.Unset_And_Set_Mask(Registers.PCH_PP_ON_DELAYS,
+		Registers.Unset_And_Set_Mask(PCH_PP_ON_DELAYS,
 				PCH_PP_ON_DELAYS_PORT_SELECT_MASK |
 				PCH_PP_ON_DELAYS_PWR_UP_MASK |
 				PCH_PP_ON_DELAYS_PWR_UP_BL_ON_MASK,
@@ -183,26 +183,26 @@ void Setup_PP_Sequencer(Boolean Default_Delays)
 				PCH_PP_ON_DELAYS_PWR_UP(Delays_US[Power_Up_Delay]) |
 				PCH_PP_ON_DELAYS_PWR_UP_BL_ON(100)
 		);
-		Registers.Unset_And_Set_Mask(Registers.PCH_PP_OFF_DELAYS,
+		Registers.Unset_And_Set_Mask(PCH_PP_OFF_DELAYS,
 				PCH_PP_OFF_DELAYS_PWR_DOWN_MASK |
 				PCH_PP_OFF_DELAYS_BL_OFF_PWR_DOWN_MASK,
 				PCH_PP_OFF_DELAYS_PWR_DOWN(Delays_US[Power_Down_Delay]) |
 				PCH_PP_OFF_DELAYS_BL_OFF_PWR_DOWN(Delays_US[BL_Off_To_Power_Down])
 		);
-		Registers.Unset_And_Set_Mask(Registers.PCH_PP_DIVISOR,
+		Registers.Unset_And_Set_Mask(PCH_PP_DIVISOR,
 				PCH_PP_DIVISOR_PWR_CYC_DELAY_MASK,
 				PCH_PP_DIVISOR_PWR_CYC_DELAY(Delays_US[Power_Cycle_Delay])
 		);
 	}
 
-	if(Config.Has_PP_Write_Protection) {
-		Registers.Unset_And_Set_Mask(Registers.PCH_PP_CONTROL,
+	if(CONFIG_Has_PP_Write_Protection) {
+		Registers.Unset_And_Set_Mask(PCH_PP_CONTROL,
 				PCH_PP_CONTROL_WRITE_PROTECT_MASK,
 				PCH_PP_CONTROL_WRITE_PROTECT_KEY |
 				PCH_PP_CONTROL_POWER_DOWN_ON_RESET
 		);
 	} else {
-		Registers.Set_Mask(Registers.PCH_PP_CONTROL, PCH_PP_CONTROL_POWER_DOWN_ON_RESET);
+		Registers.Set_Mask(PCH_PP_CONTROL, PCH_PP_CONTROL_POWER_DOWN_ON_RESET);
 	}
 }
 
@@ -212,18 +212,18 @@ void VDD_Override( void )
 	//  are should wait for the full Power Up Delay, which we would have
 	//  to do later again. And just powering on the display seems to work
 	//  too. Also this function vanished on newer hardware.
-	On();
+	On(false);
 }
 
-void On(Boolean Wait)
+void On(bool Wait)
 {
-	Boolean Was_On;
+	bool Was_On;
 
-	Registers.Is_Set_Mask(Registers.PCH_PP_CONTROL, PCH_PP_CONTROL_TARGET_ON, &Was_On);
+	Registers.Is_Set_Mask(PCH_PP_CONTROL, PCH_PP_CONTROL_TARGET_ON, &Was_On);
 	if(!Was_On) {
 		Time.Delay_Until(Power_Cycle_Timer);
 	}
-	Registers.Set_Mask(Registers.PCH_PP_CONTROL, PCH_PP_CONTROL_TARGET_ON);
+	Registers.Set_Mask(PCH_PP_CONTROL, PCH_PP_CONTROL_TARGET_ON);
 	if(!Was_On) {
 		Power_Up_Timer = Time.US_From_Now(Delays_US[Power_Up_Delay]);
 	}
@@ -235,20 +235,20 @@ void On(Boolean Wait)
 void Wait_On( void )
 {
 	Time.Delay_Until(Power_Up_Timer);
-	Registers.Wait_Unset_Mask(Registers.PCH_PP_STATUS, PCH_PP_STATUS_PWR_SEQ_PROGRESS_MASK, 300);
-	Registers.Unset_Mask(Registers.PCH_PP_CONTROL, PCH_PP_CONTROL_VDD_OVERRIDE);
+	Registers.Wait_Unset_Mask(PCH_PP_STATUS, PCH_PP_STATUS_PWR_SEQ_PROGRESS_MASK, 300);
+	Registers.Unset_Mask(PCH_PP_CONTROL, PCH_PP_CONTROL_VDD_OVERRIDE);
 }
 
 void Off( void )
 {
-	Boolean Was_On;
-	Registers.Is_Set_Mask(Registers.PCH_PP_CONTROL, PCH_PP_CONTROL_TARGET_ON, Was_On);
-	Registers.Unset_Mask(Registers.PCH_PP_CONTROL,
+	bool Was_On;
+	Registers.Is_Set_Mask(PCH_PP_CONTROL, PCH_PP_CONTROL_TARGET_ON, Was_On);
+	Registers.Unset_Mask(PCH_PP_CONTROL,
 			PCH_PP_CONTROL_TARGET_ON | PCH_PP_CONTROL_VDD_OVERRIDE);
 	if(Was_On) {
-		Time.U_Delay(Delays_US[Power_Down_Delay]);
+		udelay(Delays_US[Power_Down_Delay]);
 	}
-	Registers.Wait_Unset_Mask(Registers.PCH_PP_STATUS, PCH_PP_STATUS_PWR_SEQ_PROGRESS_MASK, 600);
+	Registers.Wait_Unset_Mask(PCH_PP_STATUS, PCH_PP_STATUS_PWR_SEQ_PROGRESS_MASK, 600);
 	if(Was_On) {
 		Power_Cycle_Timer = Time.US_From_Now(Delays_US[Power_Cycle_Delay]);
 	}
@@ -256,22 +256,22 @@ void Off( void )
 
 void Backlight_On( void )
 {
-	Registers.Set_Mask(Registers.PCH_PP_CONTROL, PCH_PP_CONTROL_BACKLIGHT_ENABLE);
+	Registers.Set_Mask(PCH_PP_CONTROL, PCH_PP_CONTROL_BACKLIGHT_ENABLE);
 }
 
 void Backlight_Off( void )
 {
-	Registers.Unset_Mask(Registers.PCH_PP_CONTROL, PCH_PP_CONTROL_BACKLIGHT_ENABLE);
+	Registers.Unset_Mask(PCH_PP_CONTROL, PCH_PP_CONTROL_BACKLIGHT_ENABLE);
 }
 
-void Set_Backlight(Word16 Level)
+void Set_Backlight(uint16_t Level)
 {
-	Registers.Unset_And_Set_Mask(Registers.BLC_PWM_CPU_CTL, CPU_BLC_PWM_DATA_BL_DUTY_CYC_MASK, Word32(Level));
+	Registers.Unset_And_Set_Mask(BLC_PWM_CPU_CTL, CPU_BLC_PWM_DATA_BL_DUTY_CYC_MASK, (uint32_t)(Level));
 }
 
-void Get_Max_Backlight(Word16 *Level)
+void Get_Max_Backlight(uint16_t *Level)
 {
-	Word32 Reg;
-	Registers.Read(Registers.BLC_PWM_PCH_CTL2, Reg);
-	*Level = Word16((Reg & PCH_BLC_PWM_CTL2_BL_MOD_FREQ_MASK) >> 16);
+	uint32_t Reg;
+	Registers.Read(BLC_PWM_PCH_CTL2, Reg);
+	*Level = (uint16_t)((Reg & PCH_BLC_PWM_CTL2_BL_MOD_FREQ_MASK) >> 16);
 }

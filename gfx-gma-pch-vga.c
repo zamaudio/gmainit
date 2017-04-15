@@ -33,14 +33,14 @@
 
 void On(FDI_Port_Type Port, Mode_Type Mode)
 {
-	Word32 Polarity = 0;
+	uint32_t Polarity = 0;
 	if(Mode.H_Sync_Active_High) {
 		Polarity |= PCH_ADPA_HSYNC_ACTIVE_HIGH;
 	}
 	if(Mode.V_Sync_Active_High) {
 		Polarity |= PCH_ADPA_VSYNC_ACTIVE_HIGH;
 	}
-	Registers.Unset_And_Set_Mask(Registers.PCH_ADPA,
+	Registers.Unset_And_Set_Mask(PCH_ADPA,
 			PCH_ADPA_MASK,
 			PCH_ADPA_DAC_ENABLE |
 			PCH_TRANSCODER_SELECT[Port] |
@@ -49,11 +49,11 @@ void On(FDI_Port_Type Port, Mode_Type Mode)
 
 void Off( void )
 {
-	Word32 Sync_Disable = 0;
-	if(Config.VGA_Has_Sync_Disable) {
+	uint32_t Sync_Disable = 0;
+	if(CONFIG_VGA_Has_Sync_Disable) {
 		Sync_Disable = PCH_ADPA_HSYNC_DISABLE | PCH_ADPA_VSYNC_DISABLE;
 	}
-	Registers.Unset_And_Set_Mask(Registers.PCH_ADPA, PCH_ADPA_DAC_ENABLE, Sync_Disable);
+	Registers.Unset_And_Set_Mask(PCH_ADPA, PCH_ADPA_DAC_ENABLE, Sync_Disable);
 }
 
 #define PCH_PIXCLK_GATE_GATE			(0 << 0)
@@ -69,39 +69,39 @@ void Off( void )
 #define SBI_SSCAUXDIV_FINALDIV2SEL_SHIFT	4
 #define SBI_SSCAUXDIV_FINALDIV2SEL_MASK		(1 << 4)
 
-Word32 SBI_SSCDIVINTPHASE_DIVSEL(Word32 Val)
+uint32_t SBI_SSCDIVINTPHASE_DIVSEL(uint32_t Val)
 {
 	return (Val << SBI_SSCDIVINTPHASE_DIVSEL_SHIFT);
 }
 
-Word32 SBI_SSCDIVINTPHASE_INCVAL(Word32 Val)
+uint32_t SBI_SSCDIVINTPHASE_INCVAL(uint32_t Val)
 {
 	return (Val << SBI_SSCDIVINTPHASE_INCVAL_SHIFT);
 }
 
-Word32 SBI_SSCDIVINTPHASE_DIR(Word32 Val)
+uint32_t SBI_SSCDIVINTPHASE_DIR(uint32_t Val)
 {
 	return (Val << SBI_SSCDIVINTPHASE_DIR_SHIFT);
 }
 
-Word32 SBI_SSCAUXDIV_FINALDIV2SEL(Word32 Val)
+uint32_t SBI_SSCAUXDIV_FINALDIV2SEL(uint32_t Val)
 {
 	return (Val << SBI_SSCAUXDIV_FINALDIV2SEL_SHIFT);
 }
 
 void Clock_On(Mode_Type Mode)
 {
-	Word32 Refclock = 2700000000;
-	Word32 Aux_Div, Div_Sel, Phase_Inc, Phase_Dir;
+	uint32_t Refclock = 2700000000;
+	uint32_t Aux_Div, Div_Sel, Phase_Inc, Phase_Dir;
 
-	Registers.Write(Registers.PCH_PIXCLK_GATE, PCH_PIXCLK_GATE_GATE);
-	Sideband.Set_Mask(Sideband.SBI_ICLK, Sideband.SBI_SSCCTL6, SBI_SSCCTL_DISABLE);
+	Registers.Write(PCH_PIXCLK_GATE, PCH_PIXCLK_GATE_GATE);
+	sideband_Set_Mask(SBI_ICLK, SBI_SSCCTL6, SBI_SSCCTL_DISABLE);
 	Aux_Div = 0;
-	Div_Sel = Word32(Refclock / Mode.Dotclock - 2);
-	Phase_Inc = Word32((Refclock * 64) / Mode.Dotclock) & 0x0000003f;
+	Div_Sel = (uint32_t)(Refclock / Mode.Dotclock - 2);
+	Phase_Inc = (uint32_t)((Refclock * 64) / Mode.Dotclock) & 0x0000003f;
 	Phase_Dir = 0;
-	Sideband.Unset_And_Set_Mask(Sideband.SBI_ICLK,
-			Sideband.SBI_SSCDIVINTPHASE6,
+	sideband_Unset_And_Set_Mask(SBI_ICLK,
+			SBI_SSCDIVINTPHASE6,
 			SBI_SSCDIVINTPHASE_DIVSEL_MASK |
 			SBI_SSCDIVINTPHASE_INCVAL_MASK |
 			SBI_SSCDIVINTPHASE_DIR_MASK,
@@ -109,10 +109,10 @@ void Clock_On(Mode_Type Mode)
 			SBI_SSCDIVINTPHASE_INCVAL(Phase_Inc) |
 			SBI_SSCDIVINTPHASE_DIR(Phase_Dir) |
 			SBI_SSCDIVINTPHASE_PROPAGATE);
-	Sideband.Unset_And_Set_Mask(Sideband.SBI_ICLK,
-			Sideband.SBI_SSCAUXDIV,
+	sideband_Unset_And_Set_Mask(SBI_ICLK,
+			SBI_SSCAUXDIV,
 			SBI_SSCAUXDIV_FINALDIV2SEL_MASK,
 			SBI_SSCAUXDIV_FINALDIV2SEL(Aux_Div));
-	Sideband.Unset_Mask(Sideband.SBI_ICLK, Sideband.SBI_SSCCTL6, SBI_SSCCTL_DISABLE);
-	Registers.Write(Registers.PCH_PIXCLK_GATE, PCH_PIXCLK_GATE_UNGATE);
+	sideband_Unset_Mask(SBI_ICLK, SBI_SSCCTL6, SBI_SSCCTL_DISABLE);
+	Registers.Write(PCH_PIXCLK_GATE, PCH_PIXCLK_GATE_UNGATE);
 }

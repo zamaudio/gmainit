@@ -16,6 +16,7 @@
 #ifndef GFX_GMA_PIPE_SETUP_H
 #define GFX_GMA_PIPE_SETUP_H
 
+#include <inttypes.h>
 #include "gfx-gma-registers.h"
 
 void On(Pipe_Index Pipe, Port_Config Port_Cfg, Framebuffer_Type Framebuffer);
@@ -23,7 +24,7 @@ void Off(Pipe_Index Pipe);
 void Legacy_VGA_Off( void );
 void All_Off( void );
 void Update_Offset(Pipe_Index Pipe, Framebuffer_Type Framebuffer);
-typedef Natural WM_Levels;
+typedef uint32_t WM_Levels;
 typedef Registers.Registers_Index PLANE_WM_Type[8];
 
 typedef struct t_Controller_Type {
@@ -155,8 +156,8 @@ const Controller_Array Controllers = {
 		Registers.PS_CTRL_1_C,
 		Registers.PS_WIN_POS_1_C,
 		Registers.PS_WIN_SZ_1_C,
-		Registers.Invalid_Register,
-		Registers.Invalid_Register,
+		Registers.INVALID_REGISTER,
+		Registers.INVALID_REGISTER,
 		Registers.WM_LINETIME_C,
 		Registers.PLANE_BUF_CFG_1_C,
 		{

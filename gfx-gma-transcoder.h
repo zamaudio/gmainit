@@ -16,13 +16,15 @@
 #ifndef GFX_GMA_TRANSCODER_H
 #define GFX_GMA_TRANSCODER_H
 
+#include <stdbool.h>
+#include <inttypes.h>
 #include "gfx-gma-registers.h"
 
 void Setup(Pipe_Index Pipe, Port_Config Port_Cfg);
-void On(Pipe_Index Pipe, Port_Config Port_Cfg, Boolean Dither);
+void On(Pipe_Index Pipe, Port_Config Port_Cfg, bool Dither);
 void Off(Pipe_Index Pipe);
 void Clk_Off(Pipe_Index Pipe);
-Word32 BPC_Conf(BPC_Type BPC, Boolean Dither);
+uint32_t BPC_Conf(BPC_Type BPC, bool Dither);
 
 typedef enum {
 	Trans_EDP,
@@ -64,7 +66,7 @@ const Transcoder_Array Transcoders = {
 		Registers.PIPE_EDP_LINK_N1,
 		Registers.PIPE_EDP_DDI_FUNC_CTL,
 		Registers.PIPE_EDP_MSA_MISC,
-		Registers.Invalid_Register,
+		Registers.INVALID_REGISTER,
 	},
 	{
 		Registers.HTOTAL_A,

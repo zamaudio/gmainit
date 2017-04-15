@@ -13,13 +13,15 @@
  * GNU General Public License for more details.
  */
 
-void Fill(Word64 Linear_FB, Framebuffer_Type Framebuffer)
+#include <inttypes.h>
+#include "gfx.h"
+
+void Fill(uint64_t Linear_FB, Framebuffer_Type Framebuffer)
 {
-	Int32 Line_Start = 0;
-	FB.Set_Base_Address(Linear_FB);
+	int32_t Line_Start = 0;
 	for( int Line = 0 ; Line <= Framebuffer.Height - 1 ; Line++) {
 		for( int Col = 0 ; Col <= Framebuffer.Width - 1 ; Col++) {
-			FB.Write(FB_Index(Line_Start + Col), 0xFF000000);
+			Write(Linear_FB + Line_Start + Col, 0xFF000000);
 		}
 		Line_Start = Line_Start + Framebuffer.Stride;
 	}

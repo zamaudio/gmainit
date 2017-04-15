@@ -13,7 +13,8 @@
  * GNU General Public License for more details.
  */
 
-#include "gfx-gma-config_helpers.h"
+#include <stdbool.h>
+#include <inttypes.h>
 #include "gfx-gma-registers.h"
 #include "gfx-gma-panel.h"
 #include "gfx-gma-port_detect.h"
@@ -41,27 +42,27 @@ const Port_Name_Array Port_Names = {
 #define Display_Controller Pipe_Setup
 
 typedef PLLs.T PLLs_Type[3];
-typedef Boolean HPD_Type[9];
+typedef bool HPD_Type[9];
 typedef Time.T HPD_Delay_Type[9];
 
 PLLs_Type Allocated_PLLs;
 HPD_Delay_Type HPD_Delay;
 HPD_Type Wait_For_HPD;
 
-Boolean Initialized = False;
+bool Initialized = false;
 
 // --------------------------------------------------------------------------
 #define PCH_RAWCLK_FREQ_MASK 0x3ff
 
-Word32 PCH_RAWCLK_FREQ(Frequency_Type Freq)
+uint32_t PCH_RAWCLK_FREQUENCY(Frequency_Type Freq)
 {
-	return Word32(Freq / 1000000);
+	return (uint32_t)(Freq / 1000000);
 }
 // --------------------------------------------------------------------------
 
-Boolean Enable_Output(Pipe_Index Pipe, Pipe_Config Pipe_Cfg)
+bool Enable_Output(Pipe_Index Pipe, Pipe_Config Pipe_Cfg)
 {
-	Boolean Success;
+	bool Success;
 	Port_Config Port_Cfg;
 	Success = Config_Helpers.Fill_Port_Config(Port_Cfg, Pipe, Pipe_Cfg.Port, Pipe_Cfg.Mode);
 	if(Success) {
@@ -100,7 +101,7 @@ Boolean Enable_Output(Pipe_Index Pipe, Pipe_Config Pipe_Cfg)
 	}
 
 	if(!Success) {
-		Wait_For_HPD[Pipe_Cfg.Port] = True;
+		Wait_For_HPD[Pipe_Cfg.Port] = true;
 		if(Pipe_Cfg.Port == Internal) {
 			Panel.Off();
 		}
@@ -112,7 +113,7 @@ Boolean Enable_Output(Pipe_Index Pipe, Pipe_Config Pipe_Cfg)
 void Disable_Output(Pipe_Index Pipe, Pipe_Config Pipe_Cfg)
 {
 	Port_Config Port_Cfg;
-	Boolean Success;
+	bool Success;
 
 	Success = Config_Helpers.Fill_Port_Config(Port_Cfg, Pipe, Pipe_Cfg.Port, Pipe_Cfg.Mode);
 	if(Success) {
@@ -125,31 +126,31 @@ void Disable_Output(Pipe_Index Pipe, Pipe_Config Pipe_Cfg)
 
 void Update_Outputs(Pipe_Configs Configs)
 {
-	void Check_HPD(Active_Port_Type Port, Boolean *Detected)
+	void Check_HPD(Active_Port_Type Port, bool *Detected)
 	{
-		const Boolean HPD_Delay_Over = Time.Timed_Out(HPD_Delay[Port]);
+		const bool HPD_Delay_Over = Time.Timed_Out(HPD_Delay[Port]);
 		if(HPD_Delay_Over) {
 			Port_Detect.Hotplug_Detect(Port, Detected);
 			HPD_Delay[Port] = Time.MS_From_Now(333);
 		} else {
-			*Detected = False;
+			*Detected = false;
 		}
 	}
 
-	Boolean Power_Changed = False;
+	bool Power_Changed = false;
 	Pipe_Configs Old_Configs;
 
 	void Update_Power(void)
 	{
 		if(!Power_Changed) {
 			Power_And_Clocks.Power_Up(Old_Configs, Configs);
-			Power_Changed = True;
+			Power_Changed = true;
 		}
 	}
 	Old_Configs = Cur_Configs;
 	//  disable all pipes that changed or had a hot-plug event
 	for(int Pipe = 0; Pipe < 3; Pipe++) {
-		Boolean Unplug_Detected;
+		bool Unplug_Detected;
 		
 		if(Cur_Configs[Pipe].Port != Disabled) {
 			Check_HPD(Cur_Configs[Pipe].Port, &Unplug_Detected);
@@ -166,14 +167,14 @@ void Update_Outputs(Pipe_Configs Configs)
 	//  enable all pipes that changed and should be active
 	for( int Pipe = 0; Pipe < 3; Pipe++)
 	{
-		Boolean Success;
+		bool Success;
 
 		if(Configs[Pipe].Port!=Disabled && (Cur_Configs[Pipe].Port!=Configs[Pipe].Port || Cur_Configs[Pipe].Mode!=Configs[Pipe].Mode)) {
 			if(Wait_For_HPD[Configs[Pipe].Port]) {
 				Success = Check_HPD(Configs[Pipe].Port);
 				Wait_For_HPD[Configs[Pipe].Port] = !Success;
 			} else {
-				Success = True;
+				Success = true;
 			}
 			if(Success) {
 				Update_Power();
@@ -194,24 +195,24 @@ void Update_Outputs(Pipe_Configs Configs)
 }
 
 // --------------------------------------------------------------------------
-Boolean Initialize(Word64 MMIO_Base, Word64 Write_Delay, Boolean Clean_State)
+bool Initialize(uint64_t MMIO_Base, uint64_t Write_Delay, bool Clean_State)
 {
-	Boolean Success;
+	bool Success;
 	const Time.T Now = Time.Now;
 
-	Boolean Check_Platform(void)
+	bool Check_Platform(void)
 	{
-		Word32 Audio_VID_DID;
+		uint32_t Audio_VID_DID;
 		switch(Config.CPU) {
 		case Haswell:
 		case Broadwell:
 		case Skylake:
-			Registers.Read(Registers.AUD_VID_DID, &Audio_VID_DID);
+			Registers.Read(AUD_VID_DID, &Audio_VID_DID);
 			break;
 		case Ironlake:
 		case Sandybridge:
 		case Ivybridge:
-			Registers.Read(Registers.PCH_AUD_VID_DID, &Audio_VID_DID);
+			Registers.Read(PCH_AUD_VID_DID, &Audio_VID_DID);
 			break;
 		}
 		switch(Config.CPU) {
@@ -229,7 +230,7 @@ Boolean Initialize(Word64 MMIO_Base, Word64 Write_Delay, Boolean Clean_State)
 		return Success;
 	}
 
-	Wait_For_HPD = False;
+	Wait_For_HPD = false;
 	HPD_Delay = Now;
 	Allocated_PLLs = PLLs.Invalid;
 	Cur_Configs[0].Port = Disabled;
@@ -246,7 +247,7 @@ Boolean Initialize(Word64 MMIO_Base, Word64 Write_Delay, Boolean Clean_State)
 	PLLs.Initialize();
 	Success = Check_Platform();
 	if(!Success) {
-		Initialized = False;
+		Initialized = false;
 		return Success;
 	}
 	Panel.Setup_PP_Sequencer();
@@ -265,23 +266,23 @@ Boolean Initialize(Word64 MMIO_Base, Word64 Write_Delay, Boolean Clean_State)
 	}
 	// ------------------ Now restart from a clean state ---------------------
 	Power_And_Clocks.Initialize();
-	Registers.Unset_And_Set_Mask(Registers.PCH_RAWCLK_FREQ, PCH_RAWCLK_FREQ_MASK, PCH_RAWCLK_FREQ(Config.Default_RawClk_Freq));
-	Initialized = True;
+	Registers.Unset_And_Set_Mask(PCH_RAWCLK_FREQ, PCH_RAWCLK_FREQ_MASK, PCH_RAWCLK_FREQUENCY(Config.Default_RawClk_Freq));
+	Initialized = true;
 	return Success;
 }
 
 // --------------------------------------------------------------------------
-void Write_GTT(GTT_Range GTT_Page, GTT_Address_Type Device_Address, Boolean Valid)
+void Write_GTT(GTT_Range GTT_Page, GTT_Address_Type Device_Address, bool Valid)
 {
 	Registers.Write_GTT(GTT_Page, Device_Address, Valid);
 }
 
-void Setup_Default_GTT(Framebuffer_Type FB, Word32 Phys_FB)
+void Setup_Default_GTT(Framebuffer_Type FB, uint32_t Phys_FB)
 {
-	const Pos32 FB_Size = FB.Stride * FB.Height * Pos32(((FB.BPC * 4) / 8));
+	const uint32_t FB_Size = FB.Stride * FB.Height * (uint32_t)(((FB.BPC * 4) / 8));
 	GTT_Address_Type Phys_Addr = GTT_Address_Type(Phys_FB);
 	for( int Idx = 0; Idx < (FB_Size + 4095) / 4096; Idx++) {
-		Registers.Write_GTT(Idx, Phys_Addr, True);
+		Registers.Write_GTT(Idx, Phys_Addr, true);
 		Phys_Addr = Phys_Addr + 4096;
 	}
 }
